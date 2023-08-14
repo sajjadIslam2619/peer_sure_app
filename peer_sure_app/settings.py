@@ -140,7 +140,10 @@ LOGIN_URL = 'login'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #CSRF_TRUSTED_ORIGINS = ['https://'+ os.environ['peer-sure-deploy-test-1.azurewebsites.net']]
-CORS_ALLOWED_ORIGINS = [
-    "https://peer-sure-deploy-test-1.azurewebsites.net",  # Add your Azure app's origin
-    # Add other trusted origins if needed
-]
+
+CORS_ORIGIN_ALLOW_ALL = True
+
+#CORS_ORIGIN_ALLOW_ALL = False
+#CORS_ALLOWED_ORIGINS = [
+#    'https://peer-sure-deploy-test-1.azurewebsites.net',
+#]

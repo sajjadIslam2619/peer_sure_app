@@ -3,6 +3,7 @@
 2. pip install django-crispy-forms
 3. pip install crispy-bootstrap4 //https://stackoverflow.com/questions/75495403/django-returns-templatedoesnotexist-when-using-crispy-forms
 4. pip install whitenoise
+5. pip install django-cors-headers
 
 # django subcomments 
 django-admin
