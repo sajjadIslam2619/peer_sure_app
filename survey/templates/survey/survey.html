@@ -1,0 +1,20 @@
+{% extends "feed/base.html" %}
+{% block content %}
+<h1>{{ survey.title }}</h1>
+<form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+        <p>{{ field.label_tag }}</p>
+        {% for choice in field %}
+            <label>
+                {{ choice }}
+                <!-- {{ choice.choice_label }} -->
+            </label><br>
+        {% endfor %}
+    {% endfor %}
+    <hr>
+    <button type="submit">Submit</button>
+    <br>
+    <br>
+</form>
+{% endblock content %}

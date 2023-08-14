@@ -1,0 +1,70 @@
+# install follwing libries
+1. pip install django
+2. pip install django-crispy-forms
+3. pip install crispy-bootstrap4 //https://stackoverflow.com/questions/75495403/django-returns-templatedoesnotexist-when-using-crispy-forms
+4. pip install whitenoise
+
+# django subcomments 
+django-admin
+
+Available subcommands:
+
+[django]
+    check
+    compilemessages
+    createcachetable
+    dbshell
+    diffsettings
+    dumpdata
+    flush
+    inspectdb
+    loaddata
+    makemessages
+    makemigrations
+    migrate
+    optimizemigration
+    runserver
+    sendtestemail
+    shell
+    showmigrations
+    sqlflush
+    sqlmigrate
+    sqlsequencereset
+    squashmigrations
+    startapp
+    startproject
+    test
+    testserver
+
+# create django project
+django-admin startproject PROJECT_NAME
+
+# start surver
+python manage.py runserver
+
+# create django app
+python manage.py startapp APP_NAME
+
+#After adding new fields in DB use follwing 2 commands
+1. python manage.py makemigrations
+2. python manage.py migrate
+
+# django in jupyter notebook: https://medium.com/ayuth/how-to-use-django-in-jupyter-notebook-561ea2401852
+
+# bootstrap library: https://mdbootstrap.com/
+
+# pip freeze > requirements.txt [Includes all dependencies with conda libries]
+
+# django deployment checklist: https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
+
+### Deploy process ###
+# Create venv: virtualenv -p /usr/local/bin/python3.8 py_venv_peer_sure_deploy_test_1 [Not conda env]
+# Activate venv: source py_venv_peer_sure_deploy_test_1/bin/activate
+# Project directory: cd Documents/Research/PEER_SURE/PEER_SURE_Project/PEER_SURE_app
+# Go to project directory and try to run the project. [This step is to check the dependent library, because 'pip freeze' command all the library]
+# Include library one by on in requirements.txt file [use freeze command]
+# Create a new venv and install libries using requirements.txt [pip install -r requirements.txt]
+# Create another venv: virtualenv -p /usr/local/bin/python3.8 py_venv_peer_sure_deploy_test_2
+# Activate venv:  source py_venv_peer_sure_deploy_test_2/bin/activate
+# Install package using instruction.txt; pip install -r requirements.txt
+# Run application and test

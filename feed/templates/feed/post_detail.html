@@ -1,0 +1,80 @@
+{% extends "feed/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<script>
+  function generateResponse() {
+    var xhttp = new XMLHttpRequest();
+    var articleElements = document.getElementsByClassName('article-content');
+    if (articleElements.length > 0) {
+      var textValue = articleElements[0].textContent;
+    }
+    document.getElementById('wait_message').innerText= 'Please wait, AI is generating response...';
+
+    xhttp.onreadystatechange = function() {
+      if (xhttp.readyState == 4 && xhttp.status == 200) {
+        var response = JSON.parse(xhttp.responseText);
+        var generated_response = response.generated_response;
+        document.getElementById("id_content").value = generated_response;
+        var labelElement = document.getElementById('wait_message');
+        labelElement.textContent = '';
+      }
+    };
+    var url = "/get_generated_response/?post_value=" + encodeURIComponent(textValue);
+    xhttp.open("GET", url, true);
+    xhttp.send();
+  }
+</script>
+
+
+  <article class="media content-section">
+    <img class="rounded-circle article-img" src="{{ object.author.profile.image.url }}">
+    <div class="media-body">
+      <div class="article-metadata">
+        <a class="mr-2" href="{% url 'user-posts' object.author.username %}">{{ object.author }}</a>
+        <small class="text-muted">{{ object.date_posted|date:"F d, Y" }}</small>
+        {% if object.author == user %}
+          <div>
+            <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'post-update' object.id %}">Update</a>
+            <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'post-delete' object.id %}">Delete</a>
+          </div>
+        {% endif %}
+      </div>
+      <h2 class="article-title">{{ object.title }}</h2>
+      <p class="article-content">{{ object.content }}</p>
+    </div>
+  </article>
+  <h3>Comments...</h3>
+  {% if user.is_authenticated %}
+  <div class="content-section">
+        
+        <form action="" method="POST" id="main_form" class="comment_form">
+          {% csrf_token %}
+          <fieldset class="form-group">
+            <legend class="border-bottom mb-4">Type your comment</legend>
+            {{ comment_form|crispy }}
+            {% if user.user_profile.role == 'mentor' %}
+              <div class="form-group">
+                <button type="button" name="generate_response" onclick="generateResponse()">Generate Response with AI</button>
+                <button type="submit" value="Post">Post</button>
+                <br>
+                <label id="wait_message" style="color:rgb(32, 56, 210);"></label>
+              </div>
+            {% else %}
+              <div class="form-group">
+                <button type="submit" value="Post">Post</button>
+              </div>
+            {% endif %}
+
+          </fieldset>
+        </form>
+  </div>
+  {% endif %}
+  <div>
+    {% for comment in object.comment_set.all %}
+    <a href="{% url 'user-posts' comment.author.username %}"> {{comment.author.username }}</a>
+    <p> {{comment.content }}</p>  
+    <hr>
+    {% endfor %}
+  </div>
+  
+{% endblock content %}
