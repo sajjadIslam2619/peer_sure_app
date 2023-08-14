@@ -25,7 +25,8 @@ SECRET_KEY = 'django-insecure-&-eeyt!u!bqr4d7zy(bf7kwm33rumqrvtk3n6bkua#(^3$sse@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['peer-sure-deploy-test-1.azurewebsites.net']
+#ALLOWED_HOSTS = ['peer-sure-deploy-test-1.azurewebsites.net']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -37,6 +38,7 @@ INSTALLED_APPS = [
     'crispy_forms', 
     'crispy_bootstrap4',
     'whitenoise.runserver_nostatic',
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -49,6 +51,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -137,3 +140,7 @@ LOGIN_URL = 'login'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #CSRF_TRUSTED_ORIGINS = ['https://'+ os.environ['peer-sure-deploy-test-1.azurewebsites.net']]
+CORS_ALLOWED_ORIGINS = [
+    "https://peer-sure-deploy-test-1.azurewebsites.net",  # Add your Azure app's origin
+    # Add other trusted origins if needed
+]
