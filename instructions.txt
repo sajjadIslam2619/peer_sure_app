@@ -68,3 +68,6 @@ python manage.py startapp APP_NAME
 # Activate venv:  source py_venv_peer_sure_deploy_test_2/bin/activate
 # Install package using instruction.txt; pip install -r requirements.txt
 # Run application and test
+
+
+# https://learn.microsoft.com/en-us/answers/questions/1128978/csrf-verification-failed-request-aborted
