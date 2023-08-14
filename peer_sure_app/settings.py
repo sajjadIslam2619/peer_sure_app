@@ -136,4 +136,4 @@ LOGIN_URL = 'login'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CSRF_TRUSTED_ORIGINS = ['https://'+ os.environ['peer-sure-deploy-test-1.azurewebsites.net']]
+#CSRF_TRUSTED_ORIGINS = ['https://'+ os.environ['peer-sure-deploy-test-1.azurewebsites.net']]
