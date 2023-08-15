@@ -17,7 +17,9 @@ from django.views.generic import (
     UpdateView,
     DeleteView
 )
+from django.views.decorators.csrf import csrf_exempt
 
+#@csrf_exempt
 @login_required
 def forum(request):
     context = {
@@ -25,6 +27,7 @@ def forum(request):
     }
     return render(request, 'feed/forum.html', context)
 
+#@csrf_exempt
 @method_decorator(login_required, name='dispatch')
 class PostListView(ListView):
     model = Post
@@ -59,7 +62,7 @@ class PostListView(ListView):
             
         return user.post_set.all().order_by('-date_posted')
     
-
+#@csrf_exempt
 class UserPostListView(ListView):
     model = Post
     template_name = 'feed/user_posts.html'  # <app>/<model>_<viewtype>.html
@@ -71,6 +74,7 @@ class UserPostListView(ListView):
         return Post.objects.filter(author=user).order_by('-date_posted')
     
 
+#@csrf_exempt
 @method_decorator(login_required, name='dispatch')
 class PostDetailView(DetailView):
     model = Post
@@ -96,6 +100,7 @@ class PostDetailView(DetailView):
             new_comment.save()
             return redirect(self.request.path_info)
 
+#@csrf_exempt
 @login_required
 def postDetailView(request, pk):
     print('post request param :: ', pk)
@@ -106,6 +111,7 @@ def postDetailView(request, pk):
     }
     return render(request, 'feed/post_detail.html', context)
 
+#@csrf_exempt
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     fields = ['title', 'content']
@@ -114,7 +120,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         form.instance.author = self.request.user
         return super().form_valid(form)
     
-
+#@csrf_exempt
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
     fields = ['title', 'content']
@@ -129,6 +135,7 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             return True
         return False
 
+#@csrf_exempt
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Post
     success_url = '/'
@@ -138,6 +145,7 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         if self.request.user == post.author:
             return True
         return False
+
 
 @login_required
 def survey_question(request):

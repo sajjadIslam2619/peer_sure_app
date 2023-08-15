@@ -48,7 +48,7 @@
   <div class="content-section">
         
         <form action="" method="POST" id="main_form" class="comment_form">
-          <!-- {% csrf_token %} -->
+          {% csrf_token %}
           <fieldset class="form-group">
             <legend class="border-bottom mb-4">Type your comment</legend>
             {{ comment_form|crispy }}

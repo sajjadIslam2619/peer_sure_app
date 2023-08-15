@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Survey, Question, Option, Response
 from .forms import SurveyForm
+from django.views.decorators.csrf import csrf_exempt
 
 
 '''
@@ -9,6 +10,7 @@ def survey_home(request):
     return render(request, 'survey/survey.html', {'title': 'Survey'})
 '''
 
+@csrf_exempt
 @login_required
 #def survey_home(request, survey_id):
 def survey_home(request):

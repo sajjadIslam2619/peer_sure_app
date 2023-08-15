@@ -2,8 +2,10 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .forms import UserRegisterForm, UserProfileForm
+from django.views.decorators.csrf import csrf_exempt
 
 
+#@csrf_exempt
 def register(request):
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
@@ -23,6 +25,7 @@ def register(request):
         profile_form = UserProfileForm()
     return render(request, 'users/register.html', {'form': form, 'profile_form': profile_form})
 
+#@csrf_exempt
 @login_required
 def profile(request):
     return render(request, 'users/profile.html')

@@ -54,7 +54,7 @@ python manage.py startapp APP_NAME
 
 # bootstrap library: https://mdbootstrap.com/
 
-# pip freeze > requirements.txt [Includes all dependencies with conda libries]
+# pip freeze > requirements.txt [Includes all dependencies with many conda libries. Instead create venv with pip, includes only major library]
 
 # django deployment checklist: https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -69,6 +69,12 @@ python manage.py startapp APP_NAME
 # Activate venv:  source py_venv_peer_sure_deploy_test_2/bin/activate
 # Install package using instruction.txt; pip install -r requirements.txt
 # Run application and test
+# Follow this tutorial to deploy in Azure: https://www.youtube.com/watch?v=yhY_JqJWKxM&t=24s
 
 
-# https://learn.microsoft.com/en-us/answers/questions/1128978/csrf-verification-failed-request-aborted
+# CSRF issue: 
+# Solutions: 
+# add a DisableCSRFMiddleware: https://stackoverflow.com/questions/16458166/how-to-disable-djangos-csrf-validation [Did not test]
+# https://learn.microsoft.com/en-us/answers/questions/1128978/csrf-verification-failed-request-aborted [Did not work]
+# add @csrf_exempt in views, but login view used from django library. So did not work while login.
+# Overwrite loginView: https://gist.github.com/mvasilkov/c4dcf5300b12886ffb61e64b745cb1b1 [Worked with dengerousView method]
