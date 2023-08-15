@@ -140,6 +140,7 @@ LOGIN_URL = 'login'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# This config will ensure CSRF verification. No need to disable CSRF token. 
 CSRF_TRUSTED_ORIGINS = ['https://peer-sure-deploy-test-1.azurewebsites.net']
 
 CORS_ORIGIN_ALLOW_ALL = True
