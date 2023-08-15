@@ -140,7 +140,7 @@ LOGIN_URL = 'login'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-#CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000/']
+CSRF_TRUSTED_ORIGINS = ['https://peer-sure-deploy-test-1.azurewebsites.net']
 
 CORS_ORIGIN_ALLOW_ALL = True
 
