@@ -1,14 +1,34 @@
 # django models/objects are accessible from shell
 # To run shell: python manage.py shell
 
-
+from django.db.models import Sum, IntegerField
+from django.db.models.functions import Cast, TruncDate
 from feed.models import Post, Comment
 from django.contrib.auth.models import User
+from users.models import UserProfile
+from survey.models import Question, Survey, Option, Response
 
 # get all users/post
 User.objects.all()
 Post.objects.all()
 
+# In application, get user from 'request' object. See feed/views.py for referance.
+# Example Code to get user.
+'''
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def my_view(request):
+    # Access the logged-in user
+    user = request.user
+
+    # Now you can use the user object to access user properties
+    username = user.username
+    email = user.email
+'''
+
+# For DB query example, getting the first user or filttering any user. 
 # create a post
 user = User.objects.all().first()
 post_13 = Post(title='post13', content='create post using model objects', author=user)
@@ -63,3 +83,26 @@ for comment in comments:
 
     print(content_text)
     print(author_name)
+
+# Find all mentee of a mentor
+user_mentor = User.objects.filter(username='mentor1').first()
+mentor_email  = user_mentor.email
+mentee_list = UserProfile.objects.filter(mentor_email=mentor_email)
+
+for mentee in mentee_list:
+    print(mentee.user)
+    mentee_obj= User.objects.get(username=mentee.user)
+    print(mentee_obj.email)
+
+# Find all survey-response and groupby 
+responses = Response.objects.all()
+mentee_responses = responses.filter(user__username='mentee11')
+mentee_responses.order_by('date_responsed')
+
+# Aggregate by day and sum the selected_options
+daily_sums = mentee_responses.annotate(
+    int_selected_options=Cast('selected_options', IntegerField()),
+    response_date=TruncDate('date_responsed')
+).values('response_date').annotate(
+    total_for_date=Sum('int_selected_options')
+).order_by('response_date')

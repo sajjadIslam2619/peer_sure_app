@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'feed.apps.FeedConfig',
     'users.apps.UsersConfig',
     'survey.apps.SurveyConfig',
+    'vizual.apps.VizualConfig',
     'crispy_forms', 
     'crispy_bootstrap4',
     'whitenoise.runserver_nostatic',

@@ -1,0 +1,36 @@
+{% extends "feed/base.html" %}
+{% block content %}
+
+<!-- Date Filter -->
+<label for="start_date">Start Date:</label>
+<input type="date" id="start_date" name="start_date">
+<label for="end_date">End Date:</label>
+<input type="date" id="end_date" name="end_date">
+
+<!-- Mentee Filter -->
+<label for="mentee">Mentee:</label>
+<select id="mentee" name="mentee">
+    <option value="all">All Mentees</option>
+    {% for mentee in all_mentees %}
+        <option value="{{ mentee}}">{{ mentee }}</option>
+    {% endfor %}
+</select>
+
+<button onclick="applyFilters()">Apply Filters</button>
+<div>
+    {{ graph|safe }}
+</div>
+
+<script>
+    function applyFilters() {
+        // Get the selected values
+        const startDate = document.getElementById('start_date').value;
+        const endDate = document.getElementById('end_date').value;
+        const selectedMentee = document.getElementById('mentee').value;
+    
+        // Redirect with the selected filters as query parameters
+        window.location.href = `?start_date=${startDate}&end_date=${endDate}&mentee=${selectedMentee}`;
+    }
+</script>
+
+{% endblock content %}
