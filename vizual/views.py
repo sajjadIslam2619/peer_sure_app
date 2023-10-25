@@ -9,8 +9,11 @@ from django.db.models import Sum, IntegerField
 from django.db.models.functions import Cast, TruncDate
 import pandas as pd
 from datetime import datetime
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 
-
+@csrf_exempt
+@login_required
 # Create your views here.
 def vizual_home(request):
     start_date = request.GET.get('start_date')

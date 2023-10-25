@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,7 +21,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-&-eeyt!u!bqr4d7zy(bf7kwm33rumqrvtk3n6bkua#(^3$sse@'
+#SECRET_KEY = 'django-insecure-&-eeyt!u!bqr4d7zy(bf7kwm33rumqrvtk3n6bkua#(^3$sse@'
+#django-insecure-\&-eeyt\!u\!bqr4d7zy\(bf7kwm33rumqrvtk3n6bkua\#\(\^3\$sse@
+SECRET_KEY = os.getenv("SECRET_KEY_PEER_SURE_DEPLOY_TEST")
+#export SECRET_KEY_PEER_SURE_DEPLOY_TEST=django-insecure-\&-eeyt\!u\!bqr4d7zy\(bf7kwm33rumqrvtk3n6bkua\#\(\^3\$sse@
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -98,7 +103,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "db-peer-sure",
         "USER": "mudatalab",
-        "PASSWORD": "peer_sure_2023",
+        "PASSWORD": os.getenv("DB_PASS_PEER_SURE_DEPLOY_TEST"),
         "HOST": "db-peer-sure-deploy-test.postgres.database.azure.com",
         "PORT": "5432",
         "OPTIONS": {"sslmode": "require"},

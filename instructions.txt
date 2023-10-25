@@ -83,9 +83,8 @@ python manage.py startapp APP_NAME
 
 ##### Make DB configuration secure. 
 # Get pass from Env-variable and other configuration
+# VSCode: Azure Tab -> App Services -> $App -> Application Setting 
+# Azure Portal: $App_Services -> configuration -> Applicaton Setting
 
-# Create db in cloud-shell
-# psql --host=db-peer-sure-deploy-test.postgres.database.azure.com --port=5432 --username=mudatalab@db-peer-sure-deploy-test --dbname=db-peer-sure-deploy-test
-rg-peer-sure-app-deploy-test-1
-
-az postgres db create -g rg-peer-sure-app-deploy-test-1 -s db-peer-sure-deploy-test.postgres -n db-peer-sure
+# Create db in Azure cloud-shell
+# az postgres db create -g rg-peer-sure-app-deploy-test-1 -s db-peer-sure-deploy-test.postgres -n db-peer-sure
