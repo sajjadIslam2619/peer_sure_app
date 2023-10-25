@@ -16,6 +16,10 @@ def survey_home(request):
 def survey_home(request):
     #survey = Survey.objects.get(id=survey_id)
     survey = Survey.objects.all().first()
+
+    if survey is None:
+        return render(request, 'survey/error.html', {'message': 'No survey available.'})
+    
     if request.method == 'POST':
         #form = SurveyForm(request.POST, survey_id=survey_id)
         form = SurveyForm(request.POST, survey_id=survey.id)
