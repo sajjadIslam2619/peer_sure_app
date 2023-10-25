@@ -80,3 +80,12 @@ python manage.py startapp APP_NAME
 # https://learn.microsoft.com/en-us/answers/questions/1128978/csrf-verification-failed-request-aborted [Did not work]
 # add @csrf_exempt in views, but login view used from django library. So did not work while login.
 # Overwrite loginView: https://gist.github.com/mvasilkov/c4dcf5300b12886ffb61e64b745cb1b1 [Worked with dengerousView method]
+
+##### Make DB configuration secure. 
+# Get pass from Env-variable and other configuration
+
+# Create db in cloud-shell
+# psql --host=db-peer-sure-deploy-test.postgres.database.azure.com --port=5432 --username=mudatalab@db-peer-sure-deploy-test --dbname=db-peer-sure-deploy-test
+rg-peer-sure-app-deploy-test-1
+
+az postgres db create -g rg-peer-sure-app-deploy-test-1 -s db-peer-sure-deploy-test.postgres -n db-peer-sure
