@@ -21,9 +21,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-#SECRET_KEY = 'django-insecure-&-eeyt!u!bqr4d7zy(bf7kwm33rumqrvtk3n6bkua#(^3$sse@'
+SECRET_KEY = 'django-insecure-&-eeyt!u!bqr4d7zy(bf7kwm33rumqrvtk3n6bkua#(^3$sse@'
 #django-insecure-\&-eeyt\!u\!bqr4d7zy\(bf7kwm33rumqrvtk3n6bkua\#\(\^3\$sse@
-SECRET_KEY = os.getenv("SECRET_KEY_PEER_SURE_DEPLOY_TEST")
+#SECRET_KEY = os.getenv("SECRET_KEY_PEER_SURE_DEPLOY_TEST")
 #export SECRET_KEY_PEER_SURE_DEPLOY_TEST=django-insecure-\&-eeyt\!u\!bqr4d7zy\(bf7kwm33rumqrvtk3n6bkua\#\(\^3\$sse@
 
 
@@ -90,7 +90,7 @@ WSGI_APPLICATION = 'peer_sure_app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-'''
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -109,7 +109,7 @@ DATABASES = {
         "OPTIONS": {"sslmode": "require"},
     }
 }
-
+'''
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 

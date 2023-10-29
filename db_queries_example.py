@@ -1,6 +1,13 @@
 # django models/objects are accessible from shell
 # To run shell: python manage.py shell
 
+import os
+import django
+
+# Set up the Django environment
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'peer_sure_app.settings')
+django.setup()
+
 from django.db.models import Sum, IntegerField
 from django.db.models.functions import Cast, TruncDate
 from feed.models import Post, Comment
