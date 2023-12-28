@@ -150,7 +150,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
-LOGIN_REDIRECT_URL = 'feed-forum'
+LOGIN_REDIRECT_URL = 'survey-home'
 LOGIN_URL = 'login'
 
 # Default primary key field type
@@ -167,3 +167,6 @@ CORS_ORIGIN_ALLOW_ALL = True
 #CORS_ALLOWED_ORIGINS = [
 #    'https://peer-sure-deploy-test-1.azurewebsites.net',
 #]
+
+CHECK_IN_SURVEY = 'Weekly Check In Survey'
+PAST_HISTORY_SURVEY = 'Past Medical and Family History Survey'

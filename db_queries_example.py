@@ -14,6 +14,7 @@ from feed.models import Post, Comment
 from django.contrib.auth.models import User
 from users.models import UserProfile
 from survey.models import Question, Survey, Option, Response
+from peer_sure_app.settings import CHECK_IN_SURVEY, PAST_HISTORY_SURVEY
 
 # get all users/post
 User.objects.all()
@@ -113,3 +114,12 @@ daily_sums = mentee_responses.annotate(
 ).values('response_date').annotate(
     total_for_date=Sum('int_selected_options')
 ).order_by('response_date')
+
+
+surveys = Survey.objects.all()
+for survey in surveys:
+    #print("Survey Title:", survey.title)
+    #print("Survey Description:", survey.description)
+    if survey.title == CHECK_IN_SURVEY:
+        print("Survey Title:", survey.title)
+    print("-" * 50)

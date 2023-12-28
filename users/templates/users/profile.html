@@ -10,5 +10,22 @@
         </div>
       </div>
       <!-- FORM HERE -->
+      <h1>{{ survey.title }}</h1>
+      <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+            <div>
+                {{ field.errors }}
+                {{ field.label_tag }} {{ field }}
+            </div>
+        {% endfor %}
+        <hr>
+        {% if form.initial %}
+            <button type="submit" class="btn btn-primary">Update</button>
+        {% else %}
+            <button type="submit" class="btn btn-primary">Submit</button>
+        {% endif %}
+        <br><br>
+      </form>
     </div>
 {% endblock content %}

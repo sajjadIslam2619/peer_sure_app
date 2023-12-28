@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Survey, Question, Option, Response
 from .forms import SurveyForm
 from django.views.decorators.csrf import csrf_exempt
+from peer_sure_app.settings import CHECK_IN_SURVEY, PAST_HISTORY_SURVEY
 
 
 '''
@@ -15,7 +16,14 @@ def survey_home(request):
 #def survey_home(request, survey_id):
 def survey_home(request):
     #survey = Survey.objects.get(id=survey_id)
-    survey = Survey.objects.all().first()
+    #survey = Survey.objects.all().first()
+    surveys = Survey.objects.all()
+    for survey_obj in surveys:
+        #print("Survey Title:", survey.title)
+        #print("Survey Description:", survey.description)
+        if survey_obj.title == CHECK_IN_SURVEY:
+            print("Survey Title:", survey_obj.title)
+            survey = survey_obj
 
     if survey is None:
         return render(request, 'survey/error.html', {'message': 'No survey available.'})
