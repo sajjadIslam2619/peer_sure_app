@@ -123,3 +123,11 @@ for survey in surveys:
     if survey.title == CHECK_IN_SURVEY:
         print("Survey Title:", survey.title)
     print("-" * 50)
+
+
+## To retrieve the number of questions in a specific survey titled 'Weekly Check In Survey' 
+# Retrieve the Survey instance with the title 'Weekly Check In Survey'
+survey = Survey.objects.get(title='Weekly Check In Survey')
+# Count the number of questions related to this survey
+number_of_questions = Question.objects.filter(survey=survey).count()
+print(f"Number of questions in 'Weekly Check In Survey': {number_of_questions}")

@@ -2,17 +2,35 @@
 {% block content %}
 
 <!-- Date Filter -->
+<!--
 <label for="start_date">Start Date:</label>
 <input type="date" id="start_date" name="start_date">
 <label for="end_date">End Date:</label>
 <input type="date" id="end_date" name="end_date">
+-->
+<label for="start_date">Start Date:</label>
+<input type="date" id="start_date" name="start_date" value="{{ selected_start_date }}">
+
+<label for="end_date">End Date:</label>
+<input type="date" id="end_date" name="end_date" value="{{ selected_end_date }}">
 
 <!-- Mentee Filter -->
+<!--
 <label for="mentee">Mentee:</label>
 <select id="mentee" name="mentee">
     <option value="all">All Mentees</option>
     {% for mentee in all_mentees %}
         <option value="{{ mentee}}">{{ mentee }}</option>
+    {% endfor %}
+</select>
+-->
+<label for="mentee">Mentee:</label>
+<select id="mentee" name="mentee">
+    <option value="all" {% if selected_mentee_username == 'all' %} selected {% endif %}>All Mentees</option>
+    {% for mentee in all_mentees %}
+        <option value="{{ mentee }}" {% if mentee == selected_mentee_username %} selected {% endif %}>
+            {{ mentee }}
+        </option>
     {% endfor %}
 </select>
 
