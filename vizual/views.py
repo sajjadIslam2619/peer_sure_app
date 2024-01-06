@@ -14,6 +14,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models.functions import ExtractWeek, ExtractYear
 import numpy as np
 from peer_sure_app.settings import CHECK_IN_SURVEY, PAST_HISTORY_SURVEY
+from datetime import datetime, timedelta
+
 
 @csrf_exempt
 @login_required
@@ -26,7 +28,6 @@ def vizual_home(request):
     context['selected_start_date'] = start_date
     context['selected_end_date'] = end_date
     context['selected_mentee_username'] = selected_mentee_username
-
 
     print(f"REQUESTED Start Date: {start_date}, End Date: {end_date}")
 
@@ -61,6 +62,7 @@ def vizual_home(request):
 
         if earliest_response:
             earliest_date_responsed = earliest_response.date_responsed
+            start_date_obj = earliest_date_responsed
             year_start, week_number_start, weekday_start = earliest_date_responsed.date().isocalendar()
             end_date_obj = datetime.today().date()
             year_end, week_number_end, weekday_end = end_date_obj.isocalendar()
@@ -73,6 +75,8 @@ def vizual_home(request):
     print('START TIME: ', year_start, week_number_start, weekday_start)
     print('END TIME: ', year_end, week_number_end, weekday_end) 
 
+    week_difference = (year_end - year_start) * 52 + (week_number_end - week_number_start) + 1
+    
     ## To retrieve the number of questions in a specific survey
     survey = Survey.objects.get(title=CHECK_IN_SURVEY)
     number_of_questions = Question.objects.filter(survey=survey).count()
@@ -81,7 +85,7 @@ def vizual_home(request):
 
     for mentee in mentee_list:
         mentee_obj= User.objects.get(username=mentee.user)
-
+        '''
         mentee_responses = Response.objects.filter(
             user=mentee_obj
         ).annotate(
@@ -93,6 +97,11 @@ def vizual_home(request):
             response_year__lte=year_end,
             response_week__lte=week_number_end
         ).order_by('date_responsed')
+        '''
+        end_date_obj += timedelta(days=1)
+        mentee_responses = Response.objects.filter( 
+            user=mentee_obj ).filter( 
+            date_responsed__range=[start_date_obj, end_date_obj] ).order_by('date_responsed')
 
         weekly_scores = {}
         weekly_response_count = {}
@@ -122,7 +131,8 @@ def vizual_home(request):
 
         scores_list = []
         prev_score = 0
-        
+
+        '''
         for week in range(week_number_start, week_number_end + 1):
             if (year_start, week) in weekly_scores:
                 number_of_weekly_response = weekly_response_count[(year, week_number)]/number_of_questions
@@ -131,7 +141,23 @@ def vizual_home(request):
             else:
                 #scores_list.append(prev_score)
                 scores_list.append(0)
-        
+        '''
+        week_itr = week_number_start
+        year_itr = year_start
+
+        for itr in range(week_difference):
+            if week_itr > 52: 
+                week_itr = 1
+                year_itr = year_itr + 1
+
+            if (year_itr, week_itr) in weekly_scores:
+                number_of_weekly_response = weekly_response_count[(year, week_number)]/number_of_questions
+                scores_list.append(weekly_scores[(year_itr, week_itr)]/number_of_weekly_response) # average the score
+                #prev_score = weekly_scores[(year_start, week)]
+            else:
+                #scores_list.append(prev_score)
+                scores_list.append(0)
+            week_itr = week_itr + 1
 
         # Add the scores list to the mentee_scores dictionary
         mentee_scores[mentee_obj.username] = scores_list
@@ -144,8 +170,20 @@ def vizual_home(request):
     else:
         first_mentee = next(iter(mentee_scores.values()))
         #data_x = [f'Response/Week {i + 1}' for i in range(len(first_mentee))]
-        data_x = [f'{year_start}-{week}' for week in range(week_number_start, week_number_end + 1)]
+        #data_xx = [f'{year_start}-{week}' for week in range(week_number_start, week_number_end + 1)]
 
+        data_x = []
+        week_itr = week_number_start
+        year_itr = year_start
+
+        for itr in range(week_difference):
+            if week_itr > 52: 
+                week_itr = 1
+                year_itr = year_itr + 1
+            formatted_week = f'{week_itr:02d}'
+            data_x.append(f'{year_itr}_{formatted_week}')
+            week_itr = week_itr + 1
+        
         df = pd.DataFrame({'Responses': data_x})
         for mentee_name, scores in mentee_scores.items():
             df[f"{mentee_name}"] = scores
