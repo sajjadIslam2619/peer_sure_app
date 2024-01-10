@@ -13,7 +13,7 @@ class UserRegisterForm(UserCreationForm):
 
 
 class UserProfileForm(forms.ModelForm):
-    mentor_email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Please enter your mentor\'s email here, if you have a mentor. Otherwise you will be assigned a mentor later.'}))
+    #mentor_email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Please enter your mentor\'s email here, if you have a mentor. Otherwise you will be assigned a mentor later.'}))
     class Meta:
         model = UserProfile
         fields = ['role', 'mentor_email']
