@@ -1,44 +1,43 @@
 {% extends "feed/base.html" %}
 {% block content %}
 
-<!-- Date Filter -->
-<!--
-<label for="start_date">Start Date:</label>
-<input type="date" id="start_date" name="start_date">
-<label for="end_date">End Date:</label>
-<input type="date" id="end_date" name="end_date">
--->
-<label for="start_date">Start Date:</label>
-<input type="date" id="start_date" name="start_date" value="{{ selected_start_date }}">
-
-<label for="end_date">End Date:</label>
-<input type="date" id="end_date" name="end_date" value="{{ selected_end_date }}">
-
-<!-- Mentee Filter -->
-<!--
-<label for="mentee">Mentee:</label>
-<select id="mentee" name="mentee">
-    <option value="all">All Mentees</option>
-    {% for mentee in all_mentees %}
-        <option value="{{ mentee}}">{{ mentee }}</option>
-    {% endfor %}
-</select>
--->
-<label for="mentee">Mentee:</label>
-<select id="mentee" name="mentee">
-    <option value="all" {% if selected_mentee_username == 'all' %} selected {% endif %}>All Mentees</option>
-    {% for mentee in all_mentees %}
-        <option value="{{ mentee }}" {% if mentee == selected_mentee_username %} selected {% endif %}>
-            {{ mentee }}
-        </option>
-    {% endfor %}
-</select>
-
-<button onclick="applyFilters()">Apply Filters</button>
+<div class="container">
+    <div class="row">
+        <div class="col-12 col-md-6">
+            <div class="form-group">
+                <label for="start_date">Start Date:</label>
+                <input type="date" class="form-control" id="start_date" name="start_date" value="{{ selected_start_date }}">
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="form-group">
+                <label for="end_date">End Date:</label>
+                <input type="date" class="form-control" id="end_date" name="end_date" value="{{ selected_end_date }}">
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="form-group">
+                <label for="mentee">Mentee:</label>
+                <select class="form-control" id="mentee" name="mentee">
+                    <option value="all" {% if selected_mentee_username == 'all' %} selected {% endif %}>All Mentees</option>
+                    {% for mentee in all_mentees %}
+                        <option value="{{ mentee }}" {% if mentee == selected_mentee_username %} selected {% endif %}>
+                            {{ mentee }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-4">
+            <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+            <!-- <button class="btn btn-primary w-100" onclick="applyFilters()">Apply Filters</button> -->
+        </div>
+    </div>
+</div>
+<div class="row"> <br/> </div>
 <div>
     {{ graph|safe }}
 </div>
-
 <script>
     function applyFilters() {
         // Get the selected values
