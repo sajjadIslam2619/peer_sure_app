@@ -35,21 +35,45 @@ rel="stylesheet"
     <header class="site-header">
       <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
         <div class="container">
-          <!-- <a class="navbar-brand mr-4" href="{% url 'feed-forum' %}">Welcome {{user.username}}</a> -->
-          <a class="navbar-brand mr-4" href="{% url 'survey-home' %}">Welcome {{user.username}}</a>
+          <!--<a class="navbar-brand mr-4" href="{% url 'feed-forum' %}">Welcome {{user.username}}</a> -->
+          {% if user.is_authenticated %}
+                {% if user.is_superuser %}
+                  <a class="navbar-brand mr-4" href="{% url 'survey-home' %}">Welcome {{user.username}}</a>
+                {% elif user.user_profile.role == 'mentor' %}
+                  <a class="navbar-brand mr-4" href="{% url 'vizual-home' %}">Welcome {{user.username}}</a>
+                {% elif user.user_profile.role == 'mentee' %}
+                  <a class="navbar-brand mr-4" href="{% url 'survey-home' %}">Welcome {{user.username}}</a>
+                {% endif %}
+              {% endif %}
+          <!--<a class="navbar-brand mr-4" href="{% url 'survey-home' %}">Welcome {{user.username}}</a> -->
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarToggle">
             <div class="navbar-nav mr-auto">
-              <a class="nav-item nav-link" href="{% url 'survey-home' %}">Check-In</a>
+              <!--<a class="nav-item nav-link" href="{% url 'survey-home' %}">Check-In</a>
               <a class="nav-item nav-link" href="{% url 'vizual-home' %}">Progress-Tracker</a>
-              <!-- <a class="nav-item nav-link" href="{% url 'feed-forum' %}">Forum</a> -->
+              <a class="nav-item nav-link" href="{% url 'feed-forum' %}">Forum</a> -->
+              {% if user.is_authenticated %}
+                {% if user.is_superuser %}
+                  <a class="nav-item nav-link" href="{% url 'vizual-home' %}">Progress-Tracker</a>
+                  <a class="nav-item nav-link" href="{% url 'survey-home' %}">Check-In</a>
+                  <a class="nav-item nav-link" href="{% url 'feed-forum' %}">Forum</a> 
+                {% elif user.user_profile.role == 'mentor' %}
+                  <a class="nav-item nav-link" href="{% url 'vizual-home' %}">Progress-Tracker</a>
+                  <!--<a class="nav-item nav-link" href="{% url 'survey-home' %}">Check-In</a>-->
+                  <a class="nav-item nav-link" href="{% url 'feed-forum' %}">Forum</a> 
+                {% elif user.user_profile.role == 'mentee' %}
+                  <!-- Links for standard users -->
+                  <a class="nav-item nav-link" href="{% url 'survey-home' %}">Check-In</a>
+                  <a class="nav-item nav-link" href="{% url 'feed-forum' %}">Forum</a>
+                {% endif %}
+              {% endif %}
             </div>
             <!-- Navbar Right Side -->
             <div class="navbar-nav">
               {% if user.is_authenticated %}
-                <!-- <a class="nav-item nav-link" href="{% url 'post-create' %}">New Post</a> -->
+                <a class="nav-item nav-link" href="{% url 'post-create' %}">New Post</a>
                 <a class="nav-item nav-link" href="{% url 'profile' %}">Profile</a>
                 <a class="nav-item nav-link" href="{% url 'logout' %}">Logout</a>
               {% else %}
@@ -89,6 +113,17 @@ rel="stylesheet"
           </div>
         </div>
         -->
+        <!-- Sidebar area -->
+        <div class="col-md-4">
+          <!--<div class="content-section">-->
+              <div id="sidebar-content">
+                  <!-- Block for sidebar content -->
+                  {% block sidebar %}
+                      <!-- Default sidebar content (can be empty or have default content) -->
+                  {% endblock %}
+              </div>
+          <!--</div>-->
+        </div>
       </div>
     </main>
 

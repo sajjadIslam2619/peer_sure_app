@@ -1,5 +1,13 @@
 {% extends "feed/base.html" %}
 {% block content %}
+<!-- Display Messages -->
+{% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div{% if message.tags %} class="{{ message.tags }}"{% endif %}></div>
+        {% endfor %}
+    </div>
+{% endif %}
 
 <div class="container">
     <div class="row">
@@ -28,6 +36,20 @@
                 </select>
             </div>
         </div>
+        <div class="col-12">
+            <div class="form-group">
+                <label for="question">Question:</label>
+                <select class="form-control" id="question" name="question">
+                    <option value="none" {% if selected_question == 'none' %} selected {% endif %}>None</option>
+                    <option value="all_questions" {% if selected_question == 'all_questions' %} selected {% endif %}>All Questions</option>
+                    {% for question in all_questions %}
+                        <option value="{{ question.id }}" {% if question.id|stringformat:"s" == selected_question %} selected {% endif %}>
+                            {{ question.question }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
         <div class="col-4">
             <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
             <!-- <button class="btn btn-primary w-100" onclick="applyFilters()">Apply Filters</button> -->
@@ -35,19 +57,56 @@
     </div>
 </div>
 <div class="row"> <br/> </div>
-<div>
-    {{ graph|safe }}
+<!-- Container for the first graph -->
+<div class="row">
+    <div class="col-12">
+        {{ graph|safe }}
+    </div>
 </div>
+
+<!-- Containers for other graphs -->
+<div class="row"> <br/> </div>
+{% for question_id, graph_html in graphs.items %}
+    <div class="row">
+        <div class="col-12">
+            <div id="graph-{{ question_id }}">
+                {{ graph_html|safe }}
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
 <script>
     function applyFilters() {
         // Get the selected values
         const startDate = document.getElementById('start_date').value;
         const endDate = document.getElementById('end_date').value;
         const selectedMentee = document.getElementById('mentee').value;
-    
+        const selectedQuestion = document.getElementById('question').value;      
         // Redirect with the selected filters as query parameters
-        window.location.href = `?start_date=${startDate}&end_date=${endDate}&mentee=${selectedMentee}`;
+        window.location.href = `?start_date=${startDate}&end_date=${endDate}&mentee=${selectedMentee}&question=${selectedQuestion}`;
     }
 </script>
 
 {% endblock content %}
+
+{% block sidebar %}
+    <div class="sidebar-content">
+        <div class="content-section">
+            <div class="banner">
+                <div class="banner-text">
+                    Mentee Statistics
+                </div>
+            </div>
+            {% for mentee, stats in mentee_stats.items %}
+                <div class="mentee-stat">
+                    <strong>{{ mentee }}:</strong><br>
+                    Median Score: {{ stats.median_score }}<br>
+                    Missing Response: {{ stats.zero_count }}
+                </div>
+            {% empty %}
+                <p>No statistics available.</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

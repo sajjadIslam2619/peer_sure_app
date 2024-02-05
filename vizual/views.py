@@ -15,6 +15,10 @@ from django.db.models.functions import ExtractWeek, ExtractYear
 import numpy as np
 from peer_sure_app.settings import CHECK_IN_SURVEY, PAST_HISTORY_SURVEY
 from datetime import datetime, timedelta
+from django.shortcuts import get_object_or_404
+import plotly.graph_objects as go
+from statistics import median
+from django.contrib import messages
 
 
 @csrf_exempt
@@ -23,11 +27,24 @@ def vizual_home(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
     selected_mentee_username = request.GET.get('mentee')
-    
+    selected_question_id = request.GET.get('question')
+
+    if selected_question_id is None or selected_question_id.lower() == 'none':
+        question_filter = False
+    else:
+        question_filter = True
+
+    check_in_survey = get_object_or_404(Survey, title=CHECK_IN_SURVEY)
+    all_questions = Question.objects.filter(survey=check_in_survey)
+    question_map = {question.id: question.question for question in all_questions}
+
     context = {}
     context['selected_start_date'] = start_date
     context['selected_end_date'] = end_date
     context['selected_mentee_username'] = selected_mentee_username
+    context['all_questions'] = all_questions
+    context['selected_question'] = selected_question_id
+    
 
     print(f"REQUESTED Start Date: {start_date}, End Date: {end_date}")
 
@@ -37,14 +54,11 @@ def vizual_home(request):
     mentee_list = UserProfile.objects.filter(mentor_email=mentor_email)
 
     all_mentees = []
-    for mentee in mentee_list:
-        mentee_obj= User.objects.get(username=mentee.user)
-        #all_mentees.append(mentee_obj.username)
 
     if selected_mentee_username is not None and selected_mentee_username != 'all':
         mentee_list = UserProfile.objects.filter(user__username=selected_mentee_username)
     
-    if start_date: 
+    if start_date:
         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d").date()
         if end_date:
             end_date_obj = datetime.strptime(end_date, "%Y-%m-%d").date()
@@ -56,7 +70,7 @@ def vizual_home(request):
 
     else:
         mentee_users = UserProfile.objects.filter(mentor_email=mentor_email).values_list('user', flat=True)
-        mentee_responses = Response.objects.filter(user__in=mentee_users)
+        mentee_responses = Response.objects.filter(user__in=mentee_users, survey = check_in_survey)
         sorted_responses = mentee_responses.order_by('date_responsed')
         earliest_response = sorted_responses.first()
 
@@ -64,52 +78,60 @@ def vizual_home(request):
             earliest_date_responsed = earliest_response.date_responsed
             start_date_obj = earliest_date_responsed
             year_start, week_number_start, weekday_start = earliest_date_responsed.date().isocalendar()
-            end_date_obj = datetime.today().date()
+            if end_date:
+                end_date_obj = datetime.strptime(end_date, "%Y-%m-%d").date()
+            else: 
+                end_date_obj = datetime.today().date()
             year_end, week_number_end, weekday_end = end_date_obj.isocalendar()
         else:
-            print(f"No responses found for user.")
+            print(f"No responses found for mentees.")
             date_obj = datetime.today().date()
+            start_date_obj = date_obj
+            end_date_obj = date_obj
             year_start, week_number_start, weekday_start = date_obj.isocalendar()
             year_end, week_number_end, weekday_end = date_obj.isocalendar()
+            messages.info(request, f'No responses found for mentees')
+
     
     print('START TIME: ', year_start, week_number_start, weekday_start)
     print('END TIME: ', year_end, week_number_end, weekday_end) 
 
     week_difference = (year_end - year_start) * 52 + (week_number_end - week_number_start) + 1
     
-    ## To retrieve the number of questions in a specific survey
-    survey = Survey.objects.get(title=CHECK_IN_SURVEY)
-    number_of_questions = Question.objects.filter(survey=survey).count()
+    number_of_questions = len(all_questions)
+    #question_ids = set(Question.objects.filter(survey=check_in_survey).values_list('id', flat=True))
+    if question_filter:
+        if selected_question_id == 'all_questions':
+            question_ids = set(question_map.keys())
+        else:
+            question_ids = {int(selected_question_id)}
+    else: 
+        question_ids = set()
 
     mentee_scores = {}
+    mentee_scores_by_questions = {}
+    mentee_stats = {}
 
     for mentee in mentee_list:
         mentee_obj= User.objects.get(username=mentee.user)
-        '''
-        mentee_responses = Response.objects.filter(
-            user=mentee_obj
-        ).annotate(
-            response_year=ExtractYear('date_responsed'),
-            response_week=ExtractWeek('date_responsed')
-        ).filter(
-            response_year__gte=year_start,
-            response_week__gte=week_number_start,
-            response_year__lte=year_end,
-            response_week__lte=week_number_end
-        ).order_by('date_responsed')
-        '''
+        print('Mentee Obj :: ', mentee_obj)
         end_date_obj += timedelta(days=1)
         mentee_responses = Response.objects.filter( 
-            user=mentee_obj ).filter( 
+            user=mentee_obj,survey = check_in_survey,
             date_responsed__range=[start_date_obj, end_date_obj] ).order_by('date_responsed')
 
         weekly_scores = {}
+        weekly_scores_by_questions = {}
         weekly_response_count = {}
 
         for response in mentee_responses:
             response_date = response.date_responsed
             selected_option = response.selected_options
             question_weight = response.question.weight
+            question_id = response.question.id
+            question_str = response.question.question
+            #print('question:: ', question_id)
+            #print('question:: ', question_str)
 
             year, week_number, week_day = response_date.date().isocalendar()
 
@@ -127,21 +149,13 @@ def vizual_home(request):
                 score = 0
 
             weekly_scores[(year, week_number)] = weekly_scores.get((year, week_number), 0) + score
+            weekly_scores_by_questions [(year, week_number, question_id)] = weekly_scores_by_questions.get((year, week_number, question_id), 0) + score
             weekly_response_count[(year, week_number)] = weekly_response_count.get((year, week_number), 0) + 1
 
         scores_list = []
+        missing_week_list = []
         prev_score = 0
 
-        '''
-        for week in range(week_number_start, week_number_end + 1):
-            if (year_start, week) in weekly_scores:
-                number_of_weekly_response = weekly_response_count[(year, week_number)]/number_of_questions
-                scores_list.append(weekly_scores[(year_start, week)]/number_of_weekly_response) # average the score
-                #prev_score = weekly_scores[(year_start, week)]
-            else:
-                #scores_list.append(prev_score)
-                scores_list.append(0)
-        '''
         week_itr = week_number_start
         year_itr = year_start
 
@@ -157,21 +171,78 @@ def vizual_home(request):
             else:
                 #scores_list.append(prev_score)
                 scores_list.append(0)
+                missing_week_list.append(f'{year_itr}_{week_itr}')
             week_itr = week_itr + 1
+        
+        all_scores_list_by_questions = {}
+        for question_id in question_ids:
+            scores_list_by_questions = []
+            week_itr = week_number_start
+            year_itr = year_start
+            for itr in range(week_difference):
+                if week_itr > 52: 
+                    week_itr = 1
+                    year_itr = year_itr + 1
+                if (year_itr, week_itr, question_id) in weekly_scores_by_questions:
+                    number_of_weekly_response = weekly_response_count[(year, week_number)]/number_of_questions
+                    scores_list_by_questions.append(weekly_scores_by_questions[(year_itr, week_itr, question_id)]/number_of_weekly_response) # average the score
+                else:
+                    scores_list_by_questions.append(0)
+                week_itr = week_itr + 1
 
+            all_scores_list_by_questions[question_id] = scores_list_by_questions
+        
         # Add the scores list to the mentee_scores dictionary
         mentee_scores[mentee_obj.username] = scores_list
+        mentee_scores_by_questions[mentee_obj.username] = all_scores_list_by_questions
+        non_zero_scores = [score for score in scores_list if score > 0]
+        mentee_median = median(non_zero_scores) if non_zero_scores else 0
+        mentee_stats[mentee_obj.username] = {
+                'median_score': round(mentee_median, 2),
+                'zero_count': missing_week_list
+            }
+
+    for mentee, score_by_questions in mentee_scores_by_questions.items():
+        #print(f"{mentee}:")
+        for question_id , score in score_by_questions.items():
+            #print(f"Question {question_id}: {score}")
+            pass
+
     
     for mentee, scores in mentee_scores.items():
-        print(f"{mentee}: {scores}")
-
+        #print(f"{mentee}: {scores}")
+        pass
+    
     if not mentee_scores:
         df = pd.DataFrame({'Responses': [], 'Y': []})
     else:
-        first_mentee = next(iter(mentee_scores.values()))
-        #data_x = [f'Response/Week {i + 1}' for i in range(len(first_mentee))]
-        #data_xx = [f'{year_start}-{week}' for week in range(week_number_start, week_number_end + 1)]
+        data_x = []
+        week_itr = week_number_start
+        year_itr = year_start
 
+        for itr in range(week_difference):
+            if week_itr > 52: 
+                week_itr = 1
+                year_itr = year_itr + 1
+            formatted_week = f'{week_itr:02d}'
+            data_x.append(f'{year_itr}_{formatted_week}')
+            week_itr = week_itr + 1
+        
+        df = pd.DataFrame({'Responses': data_x})
+        
+        
+        for mentee_name, scores in mentee_scores.items():
+            df[f"{mentee_name}"] = scores
+
+    fig = px.line(df, x='Responses', y=df.columns[1:], title='Mentee Weekly Progress', labels={'value': 'Risk Score'})
+    graph_html = pio.to_html(fig, full_html=False)
+    
+    '''
+    # Initialize a Plotly figure
+    fig = go.Figure()
+    if not mentee_scores:
+        df = pd.DataFrame({'Responses': [], 'Y': []})
+    else:
         data_x = []
         week_itr = week_number_start
         year_itr = year_start
@@ -188,16 +259,66 @@ def vizual_home(request):
         for mentee_name, scores in mentee_scores.items():
             df[f"{mentee_name}"] = scores
 
-    fig = px.line(df, x='Responses', y=df.columns[1:], title='Mentee Weekly Progress', labels={'value': 'Risk Score'})
+    # Create the line plots for each mentee
+    for mentee_name in df.columns[1:]:
+        fig.add_trace(go.Scatter(
+            x=df['Responses'], 
+            y=df[mentee_name],
+            mode='lines', 
+            name=mentee_name
+        ))
 
+        # Add markers for points where the score is 0
+        zero_scores = df[df[mentee_name] == 0]
+        if not zero_scores.empty:
+            fig.add_trace(go.Scatter(
+                x=zero_scores['Responses'],
+                y=zero_scores[mentee_name],
+                mode='markers', 
+                marker=dict(size=10),
+                name=f'(Missing)'
+            ))
+
+    # Update the layout of the figure
+    fig.update_layout(
+        title='Mentee Weekly Progress', 
+        xaxis_title='Responses', 
+        yaxis_title='Risk Score'
+    )
+    # Convert the figure to HTML
     graph_html = pio.to_html(fig, full_html=False)
+    '''
+
+    all_graph_html_by_questions = {}
+    if not mentee_scores_by_questions: 
+        df_by_questions = pd.DataFrame({'Responses': [], 'Y': []})
+    else: 
+        for question_id in question_ids:
+            data_x = []
+            week_itr = week_number_start
+            year_itr = year_start
+
+            for itr in range(week_difference):
+                if week_itr > 52: 
+                    week_itr = 1
+                    year_itr = year_itr + 1
+                formatted_week = f'{week_itr:02d}'
+                data_x.append(f'{year_itr}_{formatted_week}')
+                week_itr = week_itr + 1
+
+            df_by_questions = pd.DataFrame({'Responses': data_x})
+            for mentee, score_by_questions in mentee_scores_by_questions.items():
+                for _question_id , score in score_by_questions.items():
+                    df_by_questions[f"{mentee}"] = score
+                 
+            fig_by_questions = px.line(df_by_questions, x='Responses', y=df_by_questions.columns[1:], title=question_map[question_id], labels={'value': 'Risk Score'})
+            graph_html_by_questions = pio.to_html(fig_by_questions, full_html=False)
+            all_graph_html_by_questions[question_id] = graph_html_by_questions
+
+    context['mentee_stats'] = mentee_stats
 
     context['graph'] = graph_html
+    context['graphs'] = all_graph_html_by_questions
     context['all_mentees'] = list(mentee_scores.keys())
-    '''
-    context = {
-        'graph': graph_html,
-        'all_mentees': list(mentee_scores.keys())  # List of mentee usernames
-    }'''
 
     return render(request, 'vizual/vizual.html', context)

@@ -2,30 +2,58 @@
 {% load crispy_forms_tags %}
 {% block content %}
     <div class="content-section">
-      <div class="media">
-        <!--<img class="rounded-circle account-img" src="{{ user.profile.image.url }}">-->
-        <div class="media-body">
-          <h2 class="account-heading">{{ user.username }}</h2>
-          <p class="text-secondary">{{ user.email }}</p>
-        </div>
-      </div>
-      <!-- FORM HERE -->
-      <h1>{{ survey.title }}</h1>
-      <form method="post">
-        {% csrf_token %}
-        {% for field in form %}
-            <div>
-                {{ field.errors }}
-                {{ field.label_tag }} {{ field }}
+        <div class="media">
+            <!--<img class="rounded-circle account-img" src="{{ user.profile.image.url }}">-->
+            <div class="media-body">
+                <h2 class="account-heading">{{ user.username }}</h2>
+                <p class="text-secondary">{{ user.email }}</p>
             </div>
-        {% endfor %}
-        <hr>
-        {% if form.initial %}
-            <button type="submit" class="btn btn-primary">Update</button>
-        {% else %}
-            <button type="submit" class="btn btn-primary">Submit</button>
-        {% endif %}
-        <br><br>
-      </form>
+        </div>
+
+        <!-- Tab buttons -->
+        <ul class="nav nav-tabs" id="surveyTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="pmh-tab" data-toggle="tab" href="#pmh" role="tab" aria-controls="pmh" aria-selected="true">{{ PMH_survey.title }}</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="demographic-tab" data-toggle="tab" href="#demographic" role="tab" aria-controls="demographic" aria-selected="false">{{ demographic_survey.title }}</a>
+            </li>
+        </ul>
+
+        <!-- Tab content -->
+        <div class="tab-content" id="surveyTabContent">
+            <div class="tab-pane fade show active" id="pmh" role="tabpanel" aria-labelledby="pmh-tab">
+                <br>
+                <!-- PMH Survey Form -->
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in form %}
+                    <div>
+                        {{ field.errors }}
+                        {{ field.label_tag }} {{ field }}
+                    </div>
+                    {% endfor %}
+                    <hr>
+                    <button type="submit" class="btn btn-primary">{% if form.initial %}Update{% else %}Submit{% endif %}</button>
+                    <br>
+                </form>
+            </div>
+            <div class="tab-pane fade" id="demographic" role="tabpanel" aria-labelledby="demographic-tab">
+                <br>
+                <!-- Demographic Survey Form -->
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in demographic_form %}
+                    <div>
+                        {{ field.errors }}
+                        {{ field.label_tag }} {{ field }}
+                    </div>
+                    {% endfor %}
+                    <hr>
+                    <button type="submit" class="btn btn-primary">{% if demographic_form.initial %}Update{% else %}Submit{% endif %}</button>
+                    <br>
+                </form>
+            </div>
+        </div>
     </div>
 {% endblock content %}

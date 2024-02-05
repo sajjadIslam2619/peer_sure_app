@@ -1,5 +1,13 @@
 {% extends "feed/base.html" %}
 {% block content %}
+<!-- Display Messages -->
+{% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div{% if message.tags %} class="{{ message.tags }}"{% endif %}></div>
+        {% endfor %}
+    </div>
+{% endif %}
 <h1>{{ survey.title }}</h1>
 <form method="post">
     {% csrf_token %}

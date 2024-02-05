@@ -15,6 +15,7 @@ from django.db.models import Sum, IntegerField
 from django.db.models.functions import Cast, TruncDate
 from django.db.models import Case, When, Value, IntegerField, FloatField, F
 from django.db.models.functions import ExtractWeek, ExtractYear
+from peer_sure_app.settings import CHECK_IN_SURVEY, PAST_HISTORY_SURVEY
 
 import pandas as pd
 from datetime import datetime
@@ -126,6 +127,24 @@ for mentee in mentee_list:
 
 for mentee, scores in mentee_scores.items():
     print(f"{mentee}: {scores}")
+
+
+
+from django.db.models import Count
+from django.utils import timezone
+
+
+mentee_responses = Response.objects.filter(user__username='mentee43', survey__title = 'Weekly Check In Survey - 2')
+sorted_responses = mentee_responses.order_by('date_responsed')
+#grouped_responses = mentee_responses.values('date_responsed').annotate(count=Count('id'))
+print('sorted_responses :: ', sorted_responses.count())
+first_19_responses = sorted_responses[:19]
+second_19_responses = sorted_responses[19:38]
+date_string = '27-01-2024'
+parsed_date = datetime.strptime(date_string, '%d-%m-%Y').date()
+for response in second_19_responses:
+    response.date_responsed = parsed_date
+    response.save()
 
 def main(): 
     print("hey there") 

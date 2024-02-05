@@ -50,6 +50,7 @@ urlpatterns = [
     path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name='logout'),
     #path('survey/', include('survey.urls')),
+    path('user-redirect/', user_views.user_redirect, name='user_redirect'),
     path('', include('survey.urls')),
     path('vizual/', include('vizual.urls')),
     path('feed/', include('feed.urls')),
