@@ -13,6 +13,7 @@ class SurveyForm(forms.ModelForm):
             self.fields[f'question_{question.id}'] = forms.ModelChoiceField(
                 label=question.question,
                 queryset=Option.objects.filter(question=question),
-                widget=forms.RadioSelect
+                widget=forms.RadioSelect,
+                required=False
             )
         

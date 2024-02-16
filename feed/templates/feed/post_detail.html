@@ -27,7 +27,7 @@
 
 
   <article class="media content-section">
-    <img class="rounded-circle article-img" src="{{ object.author.profile.image.url }}">
+    <!-- <img class="rounded-circle article-img" src="{{ object.author.profile.image.url }}"> -->
     <div class="media-body">
       <div class="article-metadata">
         <a class="mr-2" href="{% url 'user-posts' object.author.username %}">{{ object.author }}</a>
@@ -51,6 +51,7 @@
           {% csrf_token %}
           <fieldset class="form-group">
             <legend class="border-bottom mb-4">Type your comment</legend>
+            <a href="{% url 'user-posts' user.username %}"> Post as {{user.username }}</a>
             {{ comment_form|crispy }}
             {% if user.user_profile.role == 'mentor' %}
               <div class="form-group">

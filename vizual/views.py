@@ -111,6 +111,9 @@ def vizual_home(request):
     mentee_scores = {}
     mentee_scores_by_questions = {}
     mentee_stats = {}
+    mentee_missing_responses_weeks = {}
+    mentee_missing_responses_weeks_by_questions = {}
+    mentee_missing_responses_weeks_by_question_id = {}
 
     for mentee in mentee_list:
         mentee_obj= User.objects.get(username=mentee.user)
@@ -121,8 +124,10 @@ def vizual_home(request):
             date_responsed__range=[start_date_obj, end_date_obj] ).order_by('date_responsed')
 
         weekly_scores = {}
+        weekly_weighted_score_by_questions = {}
         weekly_scores_by_questions = {}
         weekly_response_count = {}
+        weekly_response_count_by_questions = {}
 
         for response in mentee_responses:
             response_date = response.date_responsed
@@ -138,19 +143,32 @@ def vizual_home(request):
             if selected_option.upper() in ["YES", "NO"]:
                 option_type = "YES/NO"
                 if selected_option.upper() == "YES":
-                    score = 1 * question_weight 
+                    score_weighted = 1 * question_weight
+                    score_original = 1 
                 else:
-                    score = 0
+                    score_weighted = 0
+                    score_original = 0
             elif selected_option in ["1", "2", "3", "4", "5"]:
                 option_type = "1-5"
-                score = int(selected_option)/5 * question_weight
+                score_weighted = int(selected_option)/5 * question_weight
+                score_original = int(selected_option)
             else:
                 option_type = "Other"
-                score = 0
+                score_weighted = 0
+                score_original = 0
 
-            weekly_scores[(year, week_number)] = weekly_scores.get((year, week_number), 0) + score
-            weekly_scores_by_questions [(year, week_number, question_id)] = weekly_scores_by_questions.get((year, week_number, question_id), 0) + score
+            #weekly_scores[(year, week_number)] = weekly_scores.get((year, week_number), 0) + score_weighted
+            weekly_weighted_score_by_questions[(year, week_number, question_id)] = weekly_weighted_score_by_questions.get((year, week_number, question_id), 0) + score_weighted
+            weekly_scores_by_questions [(year, week_number, question_id)] = weekly_scores_by_questions.get((year, week_number, question_id), 0) + score_original
             weekly_response_count[(year, week_number)] = weekly_response_count.get((year, week_number), 0) + 1
+            weekly_response_count_by_questions[(year, week_number, question_id)] = weekly_response_count_by_questions.get((year, week_number, question_id), 0) + 1
+
+        # Iterate over weekly_scores_by_questions and aggregate scores by (year, week)
+        for (year, week, question_id), score in weekly_weighted_score_by_questions.items():
+            if (year, week) not in weekly_scores:
+                weekly_scores[(year, week)] = 0
+            total_response_by_questions = weekly_response_count_by_questions [year, week, question_id]
+            weekly_scores[(year, week)] += score/total_response_by_questions # average calculate
 
         scores_list = []
         missing_week_list = []
@@ -158,20 +176,31 @@ def vizual_home(request):
 
         week_itr = week_number_start
         year_itr = year_start
-
+        
+        #mentee_missing_responses_weeks_by_questions = {}
         for itr in range(week_difference):
             if week_itr > 52: 
                 week_itr = 1
                 year_itr = year_itr + 1
-
+            
             if (year_itr, week_itr) in weekly_scores:
-                number_of_weekly_response = weekly_response_count[(year, week_number)]/number_of_questions
-                scores_list.append(weekly_scores[(year_itr, week_itr)]/number_of_weekly_response) # average the score
-                #prev_score = weekly_scores[(year_start, week)]
+                #number_of_weekly_response = weekly_response_count[(year, week_number)]/number_of_questions
+                #scores_list.append(weekly_scores[(year_itr, week_itr)]/number_of_weekly_response) # average the score
+                scores_list.append(weekly_scores[(year_itr, week_itr)])
+                #prev_score = weekly_scores[(year_itr, week_itr)]/number_of_weekly_response
+                prev_score = weekly_scores[(year_itr, week_itr)]
             else:
-                #scores_list.append(prev_score)
-                scores_list.append(0)
+                scores_list.append(prev_score)
+                #scores_list.append(0)
+                formatted_week = f'{week_itr:02d}'
+                yr_wk = f'{year_itr}_{formatted_week}'
+                yr_wk_missing_list = mentee_missing_responses_weeks.get(mentee_obj.username, [])
+                yr_wk_missing_list.append(yr_wk)
+                mentee_missing_responses_weeks[mentee_obj.username]= yr_wk_missing_list
                 missing_week_list.append(f'{year_itr}_{week_itr}')
+            
+            # Append the aggregated score for the week, or 0 if there was no score that week
+            #scores_list.append(weekly_scores.get((year_itr, week_itr), 0))
             week_itr = week_itr + 1
         
         all_scores_list_by_questions = {}
@@ -179,16 +208,29 @@ def vizual_home(request):
             scores_list_by_questions = []
             week_itr = week_number_start
             year_itr = year_start
+            prev_score = 0
             for itr in range(week_difference):
                 if week_itr > 52: 
                     week_itr = 1
                     year_itr = year_itr + 1
+
                 if (year_itr, week_itr, question_id) in weekly_scores_by_questions:
-                    number_of_weekly_response = weekly_response_count[(year, week_number)]/number_of_questions
-                    scores_list_by_questions.append(weekly_scores_by_questions[(year_itr, week_itr, question_id)]/number_of_weekly_response) # average the score
+                    number_of_weekly_response_by_question = weekly_response_count_by_questions[(year_itr, week_itr, question_id)]
+                    scores_list_by_questions.append(weekly_scores_by_questions[(year_itr, week_itr, question_id)]/number_of_weekly_response_by_question) # average the score
+                    prev_score = weekly_scores_by_questions[(year_itr, week_itr, question_id)]/number_of_weekly_response_by_question
                 else:
-                    scores_list_by_questions.append(0)
+                    #scores_list_by_questions.append(0)
+                    scores_list_by_questions.append(prev_score)
+                    formatted_week = f'{week_itr:02d}'
+                    yr_wk = f'{year_itr}_{formatted_week}'
+                    yr_wk_missing_set = set(mentee_missing_responses_weeks.get(mentee_obj.username, []))
+                    yr_wk_missing_set.add(yr_wk)
+
+                    mentee_missing_responses_weeks_by_questions = mentee_missing_responses_weeks_by_question_id.setdefault(question_id, {})
+                    mentee_missing_responses_weeks_by_questions[mentee_obj.username] = yr_wk_missing_set
+
                 week_itr = week_itr + 1
+
 
             all_scores_list_by_questions[question_id] = scores_list_by_questions
         
@@ -203,10 +245,11 @@ def vizual_home(request):
             }
 
     for mentee, score_by_questions in mentee_scores_by_questions.items():
-        #print(f"{mentee}:")
+        print(f"{mentee}:")
         for question_id , score in score_by_questions.items():
             #print(f"Question {question_id}: {score}")
             pass
+        print('\n')
 
     
     for mentee, scores in mentee_scores.items():
@@ -235,59 +278,21 @@ def vizual_home(request):
             df[f"{mentee_name}"] = scores
 
     fig = px.line(df, x='Responses', y=df.columns[1:], title='Mentee Weekly Progress', labels={'value': 'Risk Score'})
-    graph_html = pio.to_html(fig, full_html=False)
-    
-    '''
-    # Initialize a Plotly figure
-    fig = go.Figure()
-    if not mentee_scores:
-        df = pd.DataFrame({'Responses': [], 'Y': []})
-    else:
-        data_x = []
-        week_itr = week_number_start
-        year_itr = year_start
 
-        for itr in range(week_difference):
-            if week_itr > 52: 
-                week_itr = 1
-                year_itr = year_itr + 1
-            formatted_week = f'{week_itr:02d}'
-            data_x.append(f'{year_itr}_{formatted_week}')
-            week_itr = week_itr + 1
-        
-        df = pd.DataFrame({'Responses': data_x})
-        for mentee_name, scores in mentee_scores.items():
-            df[f"{mentee_name}"] = scores
-
-    # Create the line plots for each mentee
-    for mentee_name in df.columns[1:]:
-        fig.add_trace(go.Scatter(
-            x=df['Responses'], 
-            y=df[mentee_name],
-            mode='lines', 
-            name=mentee_name
-        ))
-
-        # Add markers for points where the score is 0
-        zero_scores = df[df[mentee_name] == 0]
-        if not zero_scores.empty:
-            fig.add_trace(go.Scatter(
-                x=zero_scores['Responses'],
-                y=zero_scores[mentee_name],
-                mode='markers', 
-                marker=dict(size=10),
-                name=f'(Missing)'
-            ))
-
-    # Update the layout of the figure
-    fig.update_layout(
-        title='Mentee Weekly Progress', 
-        xaxis_title='Responses', 
-        yaxis_title='Risk Score'
-    )
+    # Add markers for each specified week for the specific mentee
+    for mentee, weeks in mentee_missing_responses_weeks.items():
+        if mentee in df.columns:
+            for week in weeks:
+                week_indices = df[df['Responses'] == week].index.tolist()
+                for idx in week_indices:
+                    fig.add_scatter(x=[df['Responses'][idx]], 
+                                    y=[df[mentee][idx]], 
+                                    mode='markers', 
+                                    marker=dict(size=10, color='red', symbol='x'),
+                                    showlegend=False)
     # Convert the figure to HTML
     graph_html = pio.to_html(fig, full_html=False)
-    '''
+    
 
     all_graph_html_by_questions = {}
     if not mentee_scores_by_questions: 
@@ -308,10 +313,38 @@ def vizual_home(request):
 
             df_by_questions = pd.DataFrame({'Responses': data_x})
             for mentee, score_by_questions in mentee_scores_by_questions.items():
+                '''
                 for _question_id , score in score_by_questions.items():
+                    print('score :: ', score)
                     df_by_questions[f"{mentee}"] = score
+                '''
+                if question_id in score_by_questions:
+                    scores = score_by_questions[question_id]
+                    # Ensure mentee_scores aligns with data_x in length
+                    if len(scores) == len(data_x):
+                        df_by_questions[mentee] = scores
+                    else:
+                        # Handle cases where lengths don't match
+                        # Example: fill with NaN or interpolate
+                        pass
+
                  
             fig_by_questions = px.line(df_by_questions, x='Responses', y=df_by_questions.columns[1:], title=question_map[question_id], labels={'value': 'Risk Score'})
+            
+            # Add markers for each specified week for the specific mentee for this question
+            if question_id in mentee_missing_responses_weeks_by_question_id:
+                mentee_missing_weeks = mentee_missing_responses_weeks_by_question_id[question_id]
+                for mentee, weeks in mentee_missing_weeks.items():
+                    if mentee in df_by_questions.columns:
+                        for week in weeks:
+                            week_indices = df_by_questions[df_by_questions['Responses'] == week].index.tolist()
+                            for idx in week_indices:
+                                fig_by_questions.add_scatter(x=[df_by_questions['Responses'][idx]], 
+                                                y=[df_by_questions[mentee][idx]], 
+                                                mode='markers', 
+                                                marker=dict(size=10, color='red', symbol='x'),
+                                                showlegend=False)
+
             graph_html_by_questions = pio.to_html(fig_by_questions, full_html=False)
             all_graph_html_by_questions[question_id] = graph_html_by_questions
 

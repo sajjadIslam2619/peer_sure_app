@@ -26,13 +26,14 @@ def survey_home(request):
             user = request.user  # Get the current authenticated user
             for question in Question.objects.filter(survey_id=survey.id):
                 selected_option = form.cleaned_data[f'question_{question.id}']
-                selected_option_id = Option.objects.get(id=selected_option.id)
-                response = Response.objects.create(
-                    survey=survey,
-                    user=user,
-                    question=question,
-                    selected_options=selected_option_id.option  # Store the option's text, not the Option object
-                )
+                if selected_option:
+                    selected_option_id = Option.objects.get(id=selected_option.id)
+                    response = Response.objects.create(
+                        survey=survey,
+                        user=user,
+                        question=question,
+                        selected_options=selected_option_id.option  # Store the option's text, not the Option object
+                    )
             return redirect('thank_you')  # Redirect to a thank-you page after successful submission
     else:
         form = SurveyForm(survey_id=survey.id)
