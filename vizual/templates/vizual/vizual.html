@@ -1,4 +1,5 @@
 {% extends "feed/base.html" %}
+{% load custom_filters %}
 {% block content %}
 <!-- Display Messages -->
 {% if messages %}
@@ -60,6 +61,7 @@
 <!-- Container for the first graph -->
 <div class="row">
     <div class="col-12">
+        <p class="question-title">Mentee Overall Weekly Progress</p>
         {{ graph|safe }}
     </div>
 </div>
@@ -70,6 +72,8 @@
     <div class="row">
         <div class="col-12">
             <div id="graph-{{ question_id }}">
+                <br>
+                <p class="question-title">{{ question_titles|get_item:question_id }}</p>
                 {{ graph_html|safe }}
             </div>
         </div>
@@ -110,36 +114,6 @@
             {% endfor %}
         </div>
     </div> 
-    <!-- <div class="sidebar-content">
-        <div class="content-section">
-            <div class="banner">
-                <div class="banner-text">
-                    Statistical Insights
-                </div>
-            </div>
-            <div>
-                <b>Mentee41</b>
-                <br>
-                <b>High-Risk Factors:</b> Regular use of drugs to cope with stress; slight increase in overall risk score over time.
-                <br>
-                <b>Positive Indicators:</b> Good social support and consistent medication use.
-                <hr>
-                <b>Mentee42</b>
-                <br>
-                <b>Engagement Issues:</b> Missed survey in week 2024-05, indicating potential disengagement or a personal crisis.
-                <br>
-                <b>High-Risk Factors:</b> Fluctuating stress levels and inconsistent engagement with the recovery process.
-                <br>
-                <b>Positive Indicators:</b> Not explicitly clear due to missing data in week 2024-05.
-                <hr>
-                <b>Mentee43</b>
-                <br>
-                <b>High-Risk Factors:</b> Consistent opioid use; high and stable risk score, indicating ongoing challenges.
-                <br>
-                <b>Positive Indicators:</b> Good self-view, consistent medication use, and strong social support.
-            </div>
-        </div>
-    </div> --> 
 {% endblock %}
 
 

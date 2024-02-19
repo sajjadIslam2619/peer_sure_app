@@ -96,3 +96,15 @@ body {
     font-size: 20px;
     font-weight: bold;
 }
+
+.question-title {
+  /*font-size: 18px; /* Adjust the size as needed, or remove if you prefer default sizing */
+  /*font-weight: bold;*/
+  color: #007bff; /* Adjusted to blue, matching the theme */
+  margin-bottom: 10px;
+  text-align: left;
+  background-color: #f8f9fa;
+  padding: 5px 10px;
+  border-left: 5px solid #007bff;
+  box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}

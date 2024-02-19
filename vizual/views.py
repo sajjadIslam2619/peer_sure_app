@@ -44,7 +44,9 @@ def vizual_home(request):
     context['selected_mentee_username'] = selected_mentee_username
     context['all_questions'] = all_questions
     context['selected_question'] = selected_question_id
-    
+
+    question_titles = {str(question.id): question.question for question in all_questions}
+    context['question_titles'] = question_titles 
 
     print(f"REQUESTED Start Date: {start_date}, End Date: {end_date}")
 
@@ -114,10 +116,17 @@ def vizual_home(request):
     mentee_missing_responses_weeks = {}
     mentee_missing_responses_weeks_by_questions = {}
     mentee_missing_responses_weeks_by_question_id = {}
+    mentee_color_map = {}
+    colors = px.colors.qualitative.Set1
 
-    for mentee in mentee_list:
+    if len(mentee_list) > len(colors):
+        colors = colors * (len(mentee_list) // len(colors) + 1)
+
+    for index, mentee in enumerate(mentee_list):
         mentee_obj= User.objects.get(username=mentee.user)
         print('Mentee Obj :: ', mentee_obj)
+        mentee_color_map[mentee_obj.username] = colors[index]
+
         end_date_obj += timedelta(days=1)
         mentee_responses = Response.objects.filter( 
             user=mentee_obj,survey = check_in_survey,
@@ -255,9 +264,12 @@ def vizual_home(request):
     for mentee, scores in mentee_scores.items():
         #print(f"{mentee}: {scores}")
         pass
-    
+
+    df = pd.DataFrame()
     if not mentee_scores:
         df = pd.DataFrame({'Responses': [], 'Y': []})
+        fig = go.Figure()
+        fig.add_layout(title="No Data Available")
     else:
         data_x = []
         week_itr = week_number_start
@@ -272,28 +284,38 @@ def vizual_home(request):
             week_itr = week_itr + 1
         
         df = pd.DataFrame({'Responses': data_x})
+
+        for mentee_name, scores in mentee_scores.items():
+            df[f"{mentee_name}"] = scores
         
+        numeric_df = df.select_dtypes(include=[np.number])
+        max_y_value = numeric_df.max().max() if not numeric_df.empty else 0
+     
+        fig = px.line(df, x='Responses', y=df.columns[1:], labels={'value': 'Risk Score'})
         
         for mentee_name, scores in mentee_scores.items():
             df[f"{mentee_name}"] = scores
+            line_color = mentee_color_map.get(mentee_name, 'black')  # Default color if not found
+            fig.add_scatter(x=df['Responses'], y=df[mentee_name], mode='lines', line=dict(color=line_color), name=mentee_name, showlegend=False)
 
-    fig = px.line(df, x='Responses', y=df.columns[1:], title='Mentee Weekly Progress', labels={'value': 'Risk Score'})
+        for mentee, weeks in mentee_missing_responses_weeks.items():
+            if mentee in df.columns:
+                marker_color = mentee_color_map.get(mentee, 'black')  # Use the same color map
+                for week in weeks:
+                    week_indices = df[df['Responses'] == week].index.tolist()
+                    for idx in week_indices:
+                        fig.add_scatter(x=[df['Responses'][idx]], 
+                                        y=[df[mentee][idx]], 
+                                        mode='markers+lines', 
+                                        marker=dict(size=10, color=marker_color, symbol='x'),
+                                        showlegend=False
+                                        )
+        fig.update_layout(yaxis=dict(range=[-1, max_y_value + 1]))
 
-    # Add markers for each specified week for the specific mentee
-    for mentee, weeks in mentee_missing_responses_weeks.items():
-        if mentee in df.columns:
-            for week in weeks:
-                week_indices = df[df['Responses'] == week].index.tolist()
-                for idx in week_indices:
-                    fig.add_scatter(x=[df['Responses'][idx]], 
-                                    y=[df[mentee][idx]], 
-                                    mode='markers', 
-                                    marker=dict(size=10, color='red', symbol='x'),
-                                    showlegend=False)
     # Convert the figure to HTML
     graph_html = pio.to_html(fig, full_html=False)
     
-
+    df_by_questions = pd.DataFrame()
     all_graph_html_by_questions = {}
     if not mentee_scores_by_questions: 
         df_by_questions = pd.DataFrame({'Responses': [], 'Y': []})
@@ -313,43 +335,68 @@ def vizual_home(request):
 
             df_by_questions = pd.DataFrame({'Responses': data_x})
             for mentee, score_by_questions in mentee_scores_by_questions.items():
-                '''
-                for _question_id , score in score_by_questions.items():
-                    print('score :: ', score)
-                    df_by_questions[f"{mentee}"] = score
-                '''
+
                 if question_id in score_by_questions:
                     scores = score_by_questions[question_id]
                     # Ensure mentee_scores aligns with data_x in length
                     if len(scores) == len(data_x):
                         df_by_questions[mentee] = scores
                     else:
-                        # Handle cases where lengths don't match
-                        # Example: fill with NaN or interpolate
                         pass
 
-                 
-            fig_by_questions = px.line(df_by_questions, x='Responses', y=df_by_questions.columns[1:], title=question_map[question_id], labels={'value': 'Risk Score'})
+            numeric_df = df_by_questions.select_dtypes(include=[np.number])
+            max_y_value = numeric_df.max().max() if not numeric_df.empty else 0
+
+            fig_by_questions = px.line(df_by_questions, x='Responses', y=df_by_questions.columns[1:], labels={'value': 'Risk Score'})
             
-            # Add markers for each specified week for the specific mentee for this question
-            if question_id in mentee_missing_responses_weeks_by_question_id:
-                mentee_missing_weeks = mentee_missing_responses_weeks_by_question_id[question_id]
-                for mentee, weeks in mentee_missing_weeks.items():
-                    if mentee in df_by_questions.columns:
+            for mentee in mentee_scores_by_questions.keys():
+                line_color = mentee_color_map[mentee]
+                fig_by_questions.add_scatter(
+                    x=df_by_questions['Responses'], 
+                    y=df_by_questions[mentee], 
+                    mode='lines',
+                    line=dict(color=line_color),
+                    showlegend=False
+                )
+
+                # Add markers for each specified week for the specific mentee for this question
+                if question_id in mentee_missing_responses_weeks_by_question_id:
+                    mentee_missing_weeks = mentee_missing_responses_weeks_by_question_id[question_id]
+                    if mentee in mentee_missing_weeks:
+                        weeks = mentee_missing_weeks[mentee]
                         for week in weeks:
                             week_indices = df_by_questions[df_by_questions['Responses'] == week].index.tolist()
                             for idx in week_indices:
-                                fig_by_questions.add_scatter(x=[df_by_questions['Responses'][idx]], 
-                                                y=[df_by_questions[mentee][idx]], 
-                                                mode='markers', 
-                                                marker=dict(size=10, color='red', symbol='x'),
-                                                showlegend=False)
+                                fig_by_questions.add_scatter(
+                                    x=[df_by_questions['Responses'][idx]], 
+                                    y=[df_by_questions[mentee][idx]], 
+                                    mode='markers+lines',  # Combine markers and lines
+                                    marker=dict(color=line_color, size=10, symbol='x'),
+                                    line=dict(color=line_color),
+                                    showlegend=False  # Set to False to avoid duplicate legends
+                                )
+                if mentee_missing_responses_weeks_by_question_id:
+                    fig_by_questions.update_layout(
+                        annotations=[
+                            go.layout.Annotation(
+                                text="Marker 'x' indicates a missing response",
+                                align='left',
+                                showarrow=False,
+                                xref='paper',
+                                yref='paper',
+                                x=0.5,
+                                y=-0.25,
+                                bordercolor='black',
+                                borderwidth=1
+                            )
+                        ]
+                    )
+            fig_by_questions.update_layout(yaxis=dict(range=[-1, max_y_value + 1]))
 
             graph_html_by_questions = pio.to_html(fig_by_questions, full_html=False)
             all_graph_html_by_questions[question_id] = graph_html_by_questions
 
     context['mentee_stats'] = mentee_stats
-
     context['graph'] = graph_html
     context['graphs'] = all_graph_html_by_questions
     context['all_mentees'] = list(mentee_scores.keys())
