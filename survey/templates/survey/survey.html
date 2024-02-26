@@ -8,17 +8,22 @@
         {% endfor %}
     </div>
 {% endif %}
-<h1>{{ survey.title }}</h1>
+<h2 class="custom-title">{{ survey.title }}</h2>
 <form method="post">
     {% csrf_token %}
     {% for field in form %}
-        <p>{{ field.label_tag }}</p>
+        <p class="survey-question-title">{{ field.label_tag }}</p>
+        <div class="choices-container">
         {% for choice in field %}
-            <label>
+            <!-- <label onmouseover="hover(this)" onmouseout="unhover(this)"> -->
+            <label class="choice-button choice-option">
                 {{ choice }}
-                <!-- {{ choice.choice_label }} -->
+                <!--{{ choice.choice_label }}-->
+                <!--{{ choice.tag }}
+                <span>{{ choice.choice_label }}</span> -->
             </label><br>
         {% endfor %}
+        </div>
     {% endfor %}
     <hr>
     <!--<button type="submit">Submit</button>-->

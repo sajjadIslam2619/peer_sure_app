@@ -97,7 +97,7 @@ body {
     font-weight: bold;
 }
 
-.question-title {
+.custom-title {
   /*font-size: 18px; /* Adjust the size as needed, or remove if you prefer default sizing */
   /*font-weight: bold;*/
   color: #007bff; /* Adjusted to blue, matching the theme */
@@ -107,4 +107,63 @@ body {
   padding: 5px 10px;
   border-left: 5px solid #007bff;
   box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.survey-question-title {
+  /*font-size: 18px; /* Adjust the size as needed, or remove if you prefer default sizing */
+  /*font-weight: bold;*/
+  /*color: #007bff; /* Adjusted to blue, matching the theme */
+  margin-top: 10px;
+  margin-bottom: 10px;
+  text-align:left;
+  padding-left: 10px;
+  /*background-color: #f8f9fa;*/
+  /*padding: 5px 10px;*/
+  /*border-left: 5px solid #007bff;*/
+  border-left: 5px solid #4c9cf1;
+  /*box-shadow: 0 2px 4px rgba(0,0,0,.1);*/
+}
+
+.label-hover:hover {
+  /*background-color: #d0d5db;*/
+  /*box-shadow: 0px 0px 10px 0px rgba(0, 123, 255, 0.5);*/
+  /*text-shadow: 2px 2px 2px #000000;*/
+  /*text-shadow: 0 0 10px #a01313;*/
+  color: #007bff; /* This color will be applied on hover */
+}
+
+.choice-button {
+  display: inline-block;
+  margin: 5px;
+  /*padding: 10px 15px;*/
+  padding: 5px 25px 0px 25px; /* top, left, buttom, right */
+  /*border: 1px solid #ddd;*/
+  border: 1px solid #cfcfcf;
+  /*background-color: #f7f7f7;*/
+  background-color: #f5f3f3;
+  color: #333;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  border-radius: 7%;
+}
+
+.choice-button:hover {
+  /*background-color: #e7e7e7;*/
+  background-color: #007bff;
+  /*color: #007bff;*/
+  color: #e7e7e7;
+}
+
+.choices-container {
+  /* This sets the container to flexbox which allows horizontal alignment */
+  display: flex;
+  flex-wrap: nowrap; /* Prevents wrapping to the next line */
+  align-items: center; /* Vertically centers the items in the container */
+  gap: 1px; /* Space between each option, adjust as needed */
+}
+
+.choice-option {
+  display: flex; /* Makes each label and its contained input horizontally aligned */
+  align-items: center; /* Aligns the radio button and label text vertically */
 }

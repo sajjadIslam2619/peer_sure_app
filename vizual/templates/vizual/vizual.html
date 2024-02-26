@@ -61,7 +61,7 @@
 <!-- Container for the first graph -->
 <div class="row">
     <div class="col-12">
-        <p class="question-title">Mentee Overall Weekly Progress</p>
+        <p class="custom-title">Mentee Overall Weekly Progress</p>
         {{ graph|safe }}
     </div>
 </div>
@@ -73,7 +73,7 @@
         <div class="col-12">
             <div id="graph-{{ question_id }}">
                 <br>
-                <p class="question-title">{{ question_titles|get_item:question_id }}</p>
+                <p class="custom-title">{{ question_titles|get_item:question_id }}</p>
                 {{ graph_html|safe }}
             </div>
         </div>

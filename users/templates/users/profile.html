@@ -5,7 +5,7 @@
         <div class="media">
             <!--<img class="rounded-circle account-img" src="{{ user.profile.image.url }}">-->
             <div class="media-body">
-                <h2 class="account-heading">{{ user.username }}</h2>
+                <h4 class="account-heading">{{ user.username }}</h4>
                 <p class="text-secondary">{{ user.email }}</p>
             </div>
         </div>
@@ -30,7 +30,14 @@
                     {% for field in form %}
                     <div>
                         {{ field.errors }}
-                        {{ field.label_tag }} {{ field }}
+                        <p class="survey-question-title">{{ field.label_tag }}</p>
+                        <div class="choices-container">
+                            {% for choice in field %}
+                                <label class="choice-button choice-option">
+                                    {{ choice }}
+                                </label><br>
+                            {% endfor %}
+                        </div>
                     </div>
                     {% endfor %}
                     <hr>
@@ -46,7 +53,14 @@
                     {% for field in demographic_form %}
                     <div>
                         {{ field.errors }}
-                        {{ field.label_tag }} {{ field }}
+                        <p class="survey-question-title">{{ field.label_tag }}</p>
+                        <div>
+                            {% for choice in field %}
+                                <label class="label-hover">
+                                    {{ choice }}
+                                </label><br>
+                            {% endfor %}
+                        </div>
                     </div>
                     {% endfor %}
                     <hr>
