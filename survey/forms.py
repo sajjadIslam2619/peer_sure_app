@@ -1,5 +1,5 @@
 from django import forms
-from .models import Question, Survey, Option, Response
+from .models import Question, Survey, Option, Response, UserComment
 
 class SurveyForm(forms.ModelForm):
     class Meta:
@@ -16,4 +16,6 @@ class SurveyForm(forms.ModelForm):
                 widget=forms.RadioSelect,
                 required=False
             )
+        #user_comments = forms.CharField(widget=forms.Textarea, required=False, label='Your Comments')
+        self.fields['user_comments'] = forms.CharField(widget=forms.Textarea (attrs={'placeholder': 'Please share your comment (Optional)'}), required=False)
         

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from .models import Survey, Question, Option, Response
+from .models import Survey, Question, Option, Response, UserComment
 from .forms import SurveyForm
 from django.views.decorators.csrf import csrf_exempt
 from peer_sure_app.settings import CHECK_IN_SURVEY, PAST_HISTORY_SURVEY, DEMOGRAPHIC_SURVEY
@@ -12,10 +12,13 @@ PROFILE_SURVEY_TITLES = [PAST_HISTORY_SURVEY, DEMOGRAPHIC_SURVEY]
 @login_required
 def survey_home(request):
     surveys = Survey.objects.all()
+    survey = None
+    
     for survey_obj in surveys:
         if survey_obj.title == CHECK_IN_SURVEY:
             print("Survey Title:", survey_obj.title)
             survey = survey_obj
+            break
 
     if survey is None:
         return render(request, 'survey/error.html', {'message': 'No survey available.'})
@@ -34,6 +37,15 @@ def survey_home(request):
                         question=question,
                         selected_options=selected_option_id.option  # Store the option's text, not the Option object
                     )
+                    
+            user_comments = form.cleaned_data.get('user_comments')
+            if user_comments:
+                UserComment.objects.create(
+                    survey=survey,
+                    user=request.user,
+                    comment=user_comments
+                )
+
             return redirect('thank_you')  # Redirect to a thank-you page after successful submission
     else:
         form = SurveyForm(survey_id=survey.id)

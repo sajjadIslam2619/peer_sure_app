@@ -167,3 +167,10 @@ body {
   display: flex; /* Makes each label and its contained input horizontally aligned */
   align-items: center; /* Aligns the radio button and label text vertically */
 }
+
+.form-group-comment textarea {
+  height: 100px; /* Adjust the height as you like */
+  width: 100%; /* Use 100% to make it stretch full width of its container */
+  overflow-y: auto; /* Adds a scrollbar if text overflows */
+  resize: vertical; /* Allows users to resize the textarea vertically */
+}

@@ -142,25 +142,30 @@ def vizual_home(request):
             response_date = response.date_responsed
             selected_option = response.selected_options
             question_weight = response.question.weight
+            question_orientation = response.question.orientation
             question_id = response.question.id
             question_str = response.question.question
-            #print('question:: ', question_id)
+            #print('question_orientation:: ', question_orientation)
             #print('question:: ', question_str)
 
             year, week_number, week_day = response_date.date().isocalendar()
 
             if selected_option.upper() in ["YES", "NO"]:
+                is_yes = selected_option.upper() == "YES"
                 option_type = "YES/NO"
-                if selected_option.upper() == "YES":
-                    score_weighted = 1 * question_weight
-                    score_original = 1 
-                else:
-                    score_weighted = 0
-                    score_original = 0
+                if question_orientation == 1:
+                    score_original = int(is_yes)
+                elif question_orientation == -1:
+                    score_original = int(not is_yes)
+                score_weighted = score_original * question_weight
+
             elif selected_option in ["1", "2", "3", "4", "5"]:
                 option_type = "1-5"
-                score_weighted = int(selected_option)/5 * question_weight
-                score_original = int(selected_option)
+                selected_option = int(selected_option)
+                if question_orientation == -1:
+                    selected_option = 6 - selected_option
+                score_weighted = selected_option/5 * question_weight
+                score_original = selected_option
             else:
                 option_type = "Other"
                 score_weighted = 0
@@ -253,6 +258,8 @@ def vizual_home(request):
                 'zero_count': missing_week_list
             }
 
+    print('mentee_color_map :: ', mentee_color_map)
+
     for mentee, score_by_questions in mentee_scores_by_questions.items():
         print(f"{mentee}:")
         for question_id , score in score_by_questions.items():
@@ -291,12 +298,13 @@ def vizual_home(request):
         numeric_df = df.select_dtypes(include=[np.number])
         max_y_value = numeric_df.max().max() if not numeric_df.empty else 0
      
-        fig = px.line(df, x='Responses', y=df.columns[1:], labels={'value': 'Risk Score'})
+        #fig = px.line(df, x='Responses', y=df.columns[1:], labels={'value': 'Risk Score'})
+        fig = go.Figure()
         
         for mentee_name, scores in mentee_scores.items():
             df[f"{mentee_name}"] = scores
             line_color = mentee_color_map.get(mentee_name, 'black')  # Default color if not found
-            fig.add_scatter(x=df['Responses'], y=df[mentee_name], mode='lines', line=dict(color=line_color), name=mentee_name, showlegend=False)
+            fig.add_scatter(x=df['Responses'], y=df[mentee_name], mode='lines', line=dict(color=line_color), name=mentee_name, showlegend=True)
 
         for mentee, weeks in mentee_missing_responses_weeks.items():
             if mentee in df.columns:
@@ -319,7 +327,8 @@ def vizual_home(request):
     all_graph_html_by_questions = {}
     if not mentee_scores_by_questions: 
         df_by_questions = pd.DataFrame({'Responses': [], 'Y': []})
-    else: 
+    else:
+         
         for question_id in question_ids:
             data_x = []
             week_itr = week_number_start
@@ -347,16 +356,18 @@ def vizual_home(request):
             numeric_df = df_by_questions.select_dtypes(include=[np.number])
             max_y_value = numeric_df.max().max() if not numeric_df.empty else 0
 
-            fig_by_questions = px.line(df_by_questions, x='Responses', y=df_by_questions.columns[1:], labels={'value': 'Risk Score'})
-            
+            #fig_by_questions = px.line(df_by_questions, x='Responses', y=df_by_questions.columns[1:], labels={'value': 'Risk Score'})
+            fig_by_questions = go.Figure()            
+
             for mentee in mentee_scores_by_questions.keys():
                 line_color = mentee_color_map[mentee]
                 fig_by_questions.add_scatter(
                     x=df_by_questions['Responses'], 
                     y=df_by_questions[mentee], 
                     mode='lines',
+                    name=mentee,
                     line=dict(color=line_color),
-                    showlegend=False
+                    showlegend=True
                 )
 
                 # Add markers for each specified week for the specific mentee for this question

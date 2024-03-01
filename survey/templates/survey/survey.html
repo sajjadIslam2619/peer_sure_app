@@ -12,20 +12,23 @@
 <form method="post">
     {% csrf_token %}
     {% for field in form %}
-        <p class="survey-question-title">{{ field.label_tag }}</p>
-        <div class="choices-container">
-        {% for choice in field %}
-            <!-- <label onmouseover="hover(this)" onmouseout="unhover(this)"> -->
-            <label class="choice-button choice-option">
-                {{ choice }}
-                <!--{{ choice.choice_label }}-->
-                <!--{{ choice.tag }}
-                <span>{{ choice.choice_label }}</span> -->
-            </label><br>
+        {% if field.name != 'user_comments' %}
+            <p class="survey-question-title">{{ field.label_tag }}</p>
+            <div class="choices-container">
+            {% for choice in field %}
+                <!-- <label onmouseover="hover(this)" onmouseout="unhover(this)"> -->
+                <label class="choice-button choice-option">
+                    {{ choice }}
+                </label><br>
         {% endfor %}
         </div>
+        {% endif %}
     {% endfor %}
-    <hr>
+    <!-- User comments section -->
+    <div class="form-group form-group-comment">
+        <label for="{{ form.user_comments.id_for_label }}"></label>
+        {{ form.user_comments }}
+    </div>   
     <!--<button type="submit">Submit</button>-->
     <button type="submit" class="btn btn-primary">Submit</button>
     <br>
