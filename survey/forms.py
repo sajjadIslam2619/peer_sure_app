@@ -17,5 +17,5 @@ class SurveyForm(forms.ModelForm):
                 required=False
             )
         #user_comments = forms.CharField(widget=forms.Textarea, required=False, label='Your Comments')
-        self.fields['user_comments'] = forms.CharField(widget=forms.Textarea (attrs={'placeholder': 'Please share your comment (Optional)'}), required=False)
+        self.fields['user_comments'] = forms.CharField(widget=forms.Textarea (attrs={'placeholder': 'Anything else you want to say...'}), required=False)
         

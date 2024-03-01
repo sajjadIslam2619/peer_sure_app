@@ -170,6 +170,6 @@ CORS_ORIGIN_ALLOW_ALL = True
 #    'https://peer-sure-deploy-test-1.azurewebsites.net',
 #]
 
-CHECK_IN_SURVEY = 'Weekly Check In Survey - Test'
-PAST_HISTORY_SURVEY = 'Past Medical and Family History Survey - Test'
-DEMOGRAPHIC_SURVEY = 'Demographic Survey - Test'
+CHECK_IN_SURVEY = 'Weekly Check In Survey'
+PAST_HISTORY_SURVEY = 'Past Medical and Family History Survey'
+DEMOGRAPHIC_SURVEY = 'Demographic Survey'
