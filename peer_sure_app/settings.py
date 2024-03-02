@@ -28,10 +28,11 @@ SECRET_KEY = 'django-insecure-&-eeyt!u!bqr4d7zy(bf7kwm33rumqrvtk3n6bkua#(^3$sse@
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+#DEBUG = True
+DEBUG = False
 
-#ALLOWED_HOSTS = ['peer-sure-deploy-test-1.azurewebsites.net']
-ALLOWED_HOSTS = ['*']
+#ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['peer-sure-app.azurewebsites.net']
 
 
 # Application definition

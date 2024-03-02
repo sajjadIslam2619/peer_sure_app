@@ -257,20 +257,9 @@ def vizual_home(request):
                 'median_score': round(mentee_median, 2),
                 'zero_count': missing_week_list
             }
-
-    print('mentee_color_map :: ', mentee_color_map)
-
-    for mentee, score_by_questions in mentee_scores_by_questions.items():
-        print(f"{mentee}:")
-        for question_id , score in score_by_questions.items():
-            #print(f"Question {question_id}: {score}")
-            pass
-        print('\n')
-
     
     for mentee, scores in mentee_scores.items():
-        #print(f"{mentee}: {scores}")
-        pass
+        print(f"{mentee}: {scores}")
 
     df = pd.DataFrame()
     if not mentee_scores:
