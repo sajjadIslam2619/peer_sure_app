@@ -22,7 +22,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-&-eeyt!u!bqr4d7zy(bf7kwm33rumqrvtk3n6bkua#(^3$sse@'
-#django-insecure-\&-eeyt\!u\!bqr4d7zy\(bf7kwm33rumqrvtk3n6bkua\#\(\^3\$sse@
 #SECRET_KEY = os.getenv("SECRET_KEY_PEER_SURE_DEPLOY_TEST")
 #export SECRET_KEY_PEER_SURE_DEPLOY_TEST=django-insecure-\&-eeyt\!u\!bqr4d7zy\(bf7kwm33rumqrvtk3n6bkua\#\(\^3\$sse@
 
@@ -32,6 +31,7 @@ SECRET_KEY = 'django-insecure-&-eeyt!u!bqr4d7zy(bf7kwm33rumqrvtk3n6bkua#(^3$sse@
 DEBUG = False
 
 #ALLOWED_HOSTS = ['*']
+# For production setting (DEBUG = False), 'Allowed Host' set is mandatory. 
 ALLOWED_HOSTS = ['peer-sure-app.azurewebsites.net']
 
 
