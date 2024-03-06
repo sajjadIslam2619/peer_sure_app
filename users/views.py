@@ -6,7 +6,8 @@ from django.views.decorators.csrf import csrf_exempt
 from survey.models import Survey, Question, Option, Response
 from peer_sure_app.settings import CHECK_IN_SURVEY, PAST_HISTORY_SURVEY, DEMOGRAPHIC_SURVEY
 from django.shortcuts import get_object_or_404
-
+import logging
+logger = logging.getLogger(__name__)
 
 
 #@csrf_exempt
@@ -20,7 +21,7 @@ def register(request):
             profile = profile_form.save(commit=False)
             profile.user = user
             profile.save()
-
+            logger.info(f"User {user.username} profile created with role: {profile.role}")
             username = form.cleaned_data.get('username')
             messages.success(request, f'Account created for {username}!')
             return redirect('survey-home')
