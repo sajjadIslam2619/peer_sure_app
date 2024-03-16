@@ -15,7 +15,8 @@ from django.db.models.functions import ExtractWeek, ExtractYear
 import numpy as np
 from peer_sure_app.settings import CHECK_IN_SURVEY, PAST_HISTORY_SURVEY
 from datetime import datetime, timedelta
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
+from django.http import Http404
 import plotly.graph_objects as go
 from statistics import median
 from django.contrib import messages
@@ -34,7 +35,11 @@ def vizual_home(request):
     else:
         question_filter = True
 
-    check_in_survey = get_object_or_404(Survey, title=CHECK_IN_SURVEY)
+    try:
+        check_in_survey = get_object_or_404(Survey, title=CHECK_IN_SURVEY)
+    except Http404:
+        return render(request, 'vizual/error.html', {'message': f'Survey not available, required survey: {CHECK_IN_SURVEY}'})
+    
     all_questions = Question.objects.filter(survey=check_in_survey)
     question_map = {question.id: question.question for question in all_questions}
 
@@ -265,7 +270,7 @@ def vizual_home(request):
     if not mentee_scores:
         df = pd.DataFrame({'Responses': [], 'Y': []})
         fig = go.Figure()
-        fig.add_layout(title="No Data Available")
+        fig.update_layout(title="No Data Available")
     else:
         data_x = []
         week_itr = week_number_start

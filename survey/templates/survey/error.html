@@ -1,5 +1,7 @@
 {% extends "feed/base.html" %}
 {% block content %}
-    <h1>Error</h1>
-    <p>{{ message }}</p>
+    <div class="error-container">
+        <h3 class="error-header">Error Occurred!</h3>
+        <p class="error-message">{{ message }}</p>
+    </div>
 {% endblock content %}

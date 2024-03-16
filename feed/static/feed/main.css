@@ -155,3 +155,50 @@ body {
   overflow-y: auto; 
   resize: vertical; 
 }
+
+.error-container {
+  margin: 30px;
+  padding: 20px;
+  border: 1px solid #ff6666;
+  border-radius: 5px;
+  background-color: #fff3f3;
+}
+
+.error-header {
+  color: #cc0000;
+  margin-bottom: 20px;
+}
+
+.error-message {
+  font-size: 16px;
+  color: #333;
+}
+
+.no-posts {
+  text-align: center;
+  color: #888;
+  margin-top: 20px;
+  font-size: 1.2em;
+}
+
+.user-posts-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.user-posts-title {
+  /*font-size: 2.5em;*/
+  /*color: #333;*/
+  color: #4a90e2;
+  margin-bottom: 10px;
+}
+
+.post-count-badge {
+  display: inline-block;
+  background-color: #007bff;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 1em;
+}
+

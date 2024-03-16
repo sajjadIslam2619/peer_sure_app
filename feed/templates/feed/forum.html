@@ -1,5 +1,6 @@
 {% extends "feed/base.html" %}
 {% block content %}
+  {%if posts%}
     {% for post in posts %}
         <article class="media content-section">
           <!--<img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}"> -->
@@ -42,4 +43,7 @@
       {% endif %}
 
     {% endif %}
+  {% else %}
+    <p class="no-posts">No post available at this time.</p>
+  {% endif %}
 {% endblock content %}

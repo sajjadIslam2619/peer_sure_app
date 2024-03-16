@@ -5,7 +5,8 @@ from .forms import UserRegisterForm, UserProfileForm, HistorySurveyForm, Demogra
 from django.views.decorators.csrf import csrf_exempt
 from survey.models import Survey, Question, Option, Response
 from peer_sure_app.settings import CHECK_IN_SURVEY, PAST_HISTORY_SURVEY, DEMOGRAPHIC_SURVEY
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
+from django.http import Http404
 import logging
 logger = logging.getLogger(__name__)
 
@@ -35,10 +36,10 @@ def register(request):
 @login_required
 def profile(request):
     
-    PMH_survey = get_object_or_404(Survey, title=PAST_HISTORY_SURVEY)
-
-    if PMH_survey is None:
-        return render(request, 'survey/error.html', {'message': 'No survey available.'})
+    try:
+        PMH_survey = get_object_or_404(Survey, title=PAST_HISTORY_SURVEY)
+    except Http404:
+        return render(request, 'users/error.html', {'message': f'Survey not available, required survey: {PAST_HISTORY_SURVEY}'})
     
     # Fetch existing responses for this user and survey
     existing_responses = Response.objects.filter(survey=PMH_survey, user=request.user)
@@ -77,7 +78,10 @@ def profile(request):
         form = HistorySurveyForm(initial=initial_data, survey_id=PMH_survey.id)
 
 
-    demographic_survey = get_object_or_404(Survey, title=DEMOGRAPHIC_SURVEY)
+    try:
+        demographic_survey = get_object_or_404(Survey, title=DEMOGRAPHIC_SURVEY)
+    except Http404:
+        return render(request, 'users/error.html', {'message': f'Survey not available, required survey: {DEMOGRAPHIC_SURVEY}'})
 
     if demographic_survey is None:
         return render(request, 'survey/error.html', {'message': 'No survey available.'})

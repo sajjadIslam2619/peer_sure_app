@@ -21,7 +21,7 @@ def survey_home(request):
             break
 
     if survey is None:
-        return render(request, 'survey/error.html', {'message': 'No survey available.'})
+        return render(request, 'survey/error.html', {'message': f'Survey not available, required survey: {CHECK_IN_SURVEY}'})
     
     if request.method == 'POST':
         form = SurveyForm(request.POST, survey_id=survey.id)
