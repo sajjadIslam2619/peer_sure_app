@@ -18,6 +18,8 @@ from django.views.generic import (
     DeleteView
 )
 from django.views.decorators.csrf import csrf_exempt
+import logging
+logger = logging.getLogger(__name__)
 
 #@csrf_exempt
 @login_required
@@ -41,10 +43,6 @@ class PostListView(ListView):
 
         if user.is_superuser:
             return Post.objects.all().order_by('-date_posted')
-     
-        #userProfile= UserProfile.objects.filter(user_id=user.id).first()
-        #print('ALL user profile id ', UserProfile.objects.values('user_id'))
-
 
         if user.user_profile.role=='mentee':
             mentor_email = user.user_profile.mentor_email
@@ -83,7 +81,7 @@ class PostDetailView(DetailView):
         data = super().get_context_data(**kwargs)
         connected_comments = Comment.objects.filter(comment_post=self.get_object())
         number_of_comments = connected_comments.count()
-        print('number_of_comments :: ', number_of_comments)
+        logger.debug('Number of comments ::  {number_of_comments}')
         data['comments'] = connected_comments
         data['no_of_comments'] = number_of_comments
         data['comment_form'] = CommentForm()
@@ -103,9 +101,8 @@ class PostDetailView(DetailView):
 #@csrf_exempt
 @login_required
 def postDetailView(request, pk):
-    print('post request param :: ', pk)
+    logger.debug('Post request param ::  {pk}')
     post = get_object_or_404(Post, pk=pk)
-    print('POST:: ', post)
     context = {
         'post': post
     }

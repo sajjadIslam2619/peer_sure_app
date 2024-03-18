@@ -20,20 +20,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-&-eeyt!u!bqr4d7zy(bf7kwm33rumqrvtk3n6bkua#(^3$sse@'
-#SECRET_KEY = os.getenv("SECRET_KEY_PEER_SURE_DEPLOY_TEST")
-#export SECRET_KEY_PEER_SURE_DEPLOY_TEST=django-insecure-\&-eeyt\!u\!bqr4d7zy\(bf7kwm33rumqrvtk3n6bkua\#\(\^3\$sse@
+with open(os.path.join(BASE_DIR, 'secret_key.txt')) as f:
+    SECRET_KEY = f.read().strip()
 
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-#DEBUG = False
-
-ALLOWED_HOSTS = ['*']
-# For production setting (DEBUG = False), 'Allowed Host' set is mandatory. 
-#ALLOWED_HOSTS = ['peer-sure-app.azurewebsites.net']
-
+DJANGO_ENV = os.getenv('DJANGO_ENV_PEER_SURE', 'dev') # default dev
+print('DJANGO_ENV :: ', DJANGO_ENV)
+if DJANGO_ENV == 'prod':
+    DEBUG = False
+    ALLOWED_HOSTS = ['*','peer-sure-app.azurewebsites.net']
+    #SECRET_KEY = 'django-insecure-&-eeyt!u!bqr4d7zy(bf7kwm33rumqrvtk3n6bkua#(^3$sse@'
+    #log_file = 'app_log.log'
+else:
+    DEBUG = True
+    ALLOWED_HOSTS = ['*']
+    # SECURITY WARNING: keep the secret key used in production secret!
+    #SECRET_KEY = 'django-insecure-&-eeyt!u!bqr4d7zy(bf7kwm33rumqrvtk3n6bkua#(^3$sse@'
+    log_file = 'log/logfile.log'
 
 # Application definition
 
@@ -174,3 +176,45 @@ CORS_ORIGIN_ALLOW_ALL = True
 CHECK_IN_SURVEY = 'Weekly Check In Survey'
 PAST_HISTORY_SURVEY = 'Past Medical and Family History Survey'
 DEMOGRAPHIC_SURVEY = 'Demographic Survey'
+
+'''
+LOG_LEVEL = 'DEBUG' if DEBUG else 'INFO'
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'skip_autoreload': {
+            '()': 'django.utils.log.CallbackFilter',
+            'callback': lambda record: record.name != 'django.utils.autoreload',
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {name} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': LOG_LEVEL,
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+            'filters': ['skip_autoreload'],  # Apply the filter here
+        },
+        'file': {
+            'level': LOG_LEVEL,
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR/log_file,
+            'formatter': 'verbose',
+            'filters': ['skip_autoreload'],  # And here
+        },
+    },
+    'loggers': {
+        '': {  # Root logger
+            'handlers': ['console', 'file'],
+            'level': LOG_LEVEL,
+            'propagate': True,
+        },
+    },
+}
+'''

@@ -5,6 +5,8 @@ from .forms import SurveyForm
 from django.views.decorators.csrf import csrf_exempt
 from peer_sure_app.settings import CHECK_IN_SURVEY, PAST_HISTORY_SURVEY, DEMOGRAPHIC_SURVEY
 from django.contrib import messages
+import logging
+logger = logging.getLogger(__name__)
 
 PROFILE_SURVEY_TITLES = [PAST_HISTORY_SURVEY, DEMOGRAPHIC_SURVEY]
 
@@ -16,11 +18,12 @@ def survey_home(request):
     
     for survey_obj in surveys:
         if survey_obj.title == CHECK_IN_SURVEY:
-            print("Survey Title:", survey_obj.title)
+            logger.debug(f'Survey Title:  {survey_obj.title}')
             survey = survey_obj
             break
 
     if survey is None:
+        logger.debug(f'Survey not available, required survey: {CHECK_IN_SURVEY}')
         return render(request, 'survey/error.html', {'message': f'Survey not available, required survey: {CHECK_IN_SURVEY}'})
     
     if request.method == 'POST':

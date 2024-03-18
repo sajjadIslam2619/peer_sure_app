@@ -20,6 +20,9 @@ from django.http import Http404
 import plotly.graph_objects as go
 from statistics import median
 from django.contrib import messages
+import logging
+import os
+logger = logging.getLogger(__name__)
 
 
 @csrf_exempt
@@ -53,7 +56,7 @@ def vizual_home(request):
     question_titles = {str(question.id): question.question for question in all_questions}
     context['question_titles'] = question_titles 
 
-    print(f"REQUESTED Start Date: {start_date}, End Date: {end_date}")
+    logger.debug(f"REQUESTED Start Date: {start_date}, End Date: {end_date}")
 
     user = request.user
     mentor_email  = user.email
@@ -91,7 +94,7 @@ def vizual_home(request):
                 end_date_obj = datetime.today().date()
             year_end, week_number_end, weekday_end = end_date_obj.isocalendar()
         else:
-            print(f"No responses found for mentees.")
+            logger.debug(f'No responses found for mentees.')
             date_obj = datetime.today().date()
             start_date_obj = date_obj
             end_date_obj = date_obj
@@ -100,8 +103,8 @@ def vizual_home(request):
             messages.info(request, f'No responses found for mentees')
 
     
-    print('START TIME: ', year_start, week_number_start, weekday_start)
-    print('END TIME: ', year_end, week_number_end, weekday_end) 
+    logger.debug(f'START TIME: {year_start} {week_number_start} {weekday_start}')
+    logger.debug(f'END TIME:  {year_end} {week_number_end} {weekday_end}')
 
     week_difference = (year_end - year_start) * 52 + (week_number_end - week_number_start) + 1
     
@@ -129,7 +132,7 @@ def vizual_home(request):
 
     for index, mentee in enumerate(mentee_list):
         mentee_obj= User.objects.get(username=mentee.user)
-        print('Mentee Obj :: ', mentee_obj)
+        logger.debug(f'Mentee Obj :: {mentee_obj}')
         mentee_color_map[mentee_obj.username] = colors[index]
 
         end_date_obj += timedelta(days=1)
@@ -150,8 +153,6 @@ def vizual_home(request):
             question_orientation = response.question.orientation
             question_id = response.question.id
             question_str = response.question.question
-            #print('question_orientation:: ', question_orientation)
-            #print('question:: ', question_str)
 
             year, week_number, week_day = response_date.date().isocalendar()
 
@@ -264,7 +265,7 @@ def vizual_home(request):
             }
     
     for mentee, scores in mentee_scores.items():
-        print(f"{mentee}: {scores}")
+        logger.debug(f"{mentee}: {scores}")
 
     df = pd.DataFrame()
     if not mentee_scores:

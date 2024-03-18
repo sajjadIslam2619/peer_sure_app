@@ -7,6 +7,9 @@ from survey.models import Survey, Question, Option, Response
 from peer_sure_app.settings import CHECK_IN_SURVEY, PAST_HISTORY_SURVEY, DEMOGRAPHIC_SURVEY
 from django.shortcuts import get_object_or_404, render
 from django.http import Http404
+from django.shortcuts import redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
 import logging
 logger = logging.getLogger(__name__)
 
@@ -39,6 +42,7 @@ def profile(request):
     try:
         PMH_survey = get_object_or_404(Survey, title=PAST_HISTORY_SURVEY)
     except Http404:
+        logger.debug(f'Survey not available, required survey: {PAST_HISTORY_SURVEY}')
         return render(request, 'users/error.html', {'message': f'Survey not available, required survey: {PAST_HISTORY_SURVEY}'})
     
     # Fetch existing responses for this user and survey
@@ -54,8 +58,6 @@ def profile(request):
             except Option.DoesNotExist:
                 # Handle the case where the option does not exist
                 pass
-
-    print('initial_data :: ', initial_data)
     
     if request.method == 'POST':
         #form = SurveyForm(request.POST, survey_id=survey_id)
@@ -81,6 +83,7 @@ def profile(request):
     try:
         demographic_survey = get_object_or_404(Survey, title=DEMOGRAPHIC_SURVEY)
     except Http404:
+        logger.debug(f'Survey not available, required survey: {DEMOGRAPHIC_SURVEY}')
         return render(request, 'users/error.html', {'message': f'Survey not available, required survey: {DEMOGRAPHIC_SURVEY}'})
 
     if demographic_survey is None:
@@ -99,8 +102,6 @@ def profile(request):
             except Option.DoesNotExist:
                 # Handle the case where the option does not exist
                 pass
-
-    print('initial_data :: ', initial_data)
     
     if request.method == 'POST':
         #form = SurveyForm(request.POST, survey_id=survey_id)
@@ -124,17 +125,16 @@ def profile(request):
     
     return render(request, 'users/profile.html', {'PMH_survey': PMH_survey, 'demographic_survey': demographic_survey, 'form': form , 'demographic_form': demographic_form})
 
-from django.shortcuts import redirect
-from django.contrib.auth.decorators import login_required
 
 @login_required
 def user_redirect(request):
-    print('USER :: ', request.user.is_superuser)
+    logger.info(f"Is superuser:: {request.user.is_superuser}")
     if request.user.is_superuser: 
         return redirect('vizual-home')
     
     user_profile = request.user.user_profile
-    print('User Profile :: ', user_profile.role)
+    logger.info(f"User role :: {user_profile.role}")
+
     if user_profile.role == 'mentor':
         return redirect('vizual-home')
     elif user_profile.role == 'mentee':
@@ -143,3 +143,8 @@ def user_redirect(request):
         # default redirect or handle unknown role
         return redirect('default-redirect-url')
 
+@login_required
+def custom_logout(request):
+    logout(request)
+    #messages.info(request, "You have successfully logged out.")
+    return render(request, 'users/logout.html')

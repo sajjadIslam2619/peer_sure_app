@@ -26,9 +26,9 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.debug import sensitive_post_parameters
 
-
+'''
 class ByPassCSRFLoginView(auth_views.LoginView):
-    '''A LoginView with no CSRF protection.'''
+    #A LoginView with no CSRF protection.
     @method_decorator(sensitive_post_parameters())
     @method_decorator(csrf_exempt)
     @method_decorator(never_cache)
@@ -41,6 +41,7 @@ class ByPassCSRFLoginView(auth_views.LoginView):
                     'your LOGIN_REDIRECT_URL doesn\'t point to a login page.')
             return HttpResponseRedirect(redirect_to)
         return super(auth_views.LoginView, self).dispatch(request, *args, **kwargs)
+'''
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -48,7 +49,8 @@ urlpatterns = [
     path('profile/', user_views.profile, name='profile'),
     #path('login/', ByPassCSRFLoginView.as_view(template_name='users/login.html'), name='login'),
     path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name='logout'),
+    #path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name='logout'),
+    path('logout/', user_views.custom_logout, name='logout'),
     #path('survey/', include('survey.urls')),
     path('user-redirect/', user_views.user_redirect, name='user_redirect'),
     path('', include('survey.urls')),
