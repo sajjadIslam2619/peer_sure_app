@@ -26,7 +26,7 @@ with open(os.path.join(BASE_DIR, 'secret_key.txt')) as f:
 DJANGO_ENV = os.getenv('DJANGO_ENV_PEER_SURE', 'dev') # default dev
 print('DJANGO_ENV :: ', DJANGO_ENV)
 if DJANGO_ENV == 'prod':
-    DEBUG = False
+    DEBUG = True
     ALLOWED_HOSTS = ['*','peer-sure-app.azurewebsites.net']
     #SECRET_KEY = 'django-insecure-&-eeyt!u!bqr4d7zy(bf7kwm33rumqrvtk3n6bkua#(^3$sse@'
     #log_file = 'app_log.log'
