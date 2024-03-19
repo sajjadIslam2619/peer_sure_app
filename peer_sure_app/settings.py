@@ -37,7 +37,7 @@ if DJANGO_ENV == 'prod':
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": "db-peer-sure-app",
+            "NAME": "postgres",
             "USER": "mudatalab",
             "PASSWORD": os.getenv("DB_PASS_PEER_SURE_APP"),
             "HOST": "db-peer-sure-app.postgres.database.azure.com",
