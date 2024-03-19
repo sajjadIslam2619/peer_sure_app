@@ -30,12 +30,35 @@ if DJANGO_ENV == 'prod':
     ALLOWED_HOSTS = ['*','peer-sure-app.azurewebsites.net']
     #SECRET_KEY = 'django-insecure-&-eeyt!u!bqr4d7zy(bf7kwm33rumqrvtk3n6bkua#(^3$sse@'
     #log_file = 'app_log.log'
+
+    # Database
+    # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": "db-peer-sure-app",
+            "USER": "mudatalab",
+            "PASSWORD": os.getenv("DB_PASS_PEER_SURE_APP"),
+            "HOST": "db-peer-sure-app.postgres.database.azure.com",
+            "PORT": "5432",
+            "OPTIONS": {"sslmode": "require"},
+        }
+    }
+
 else:
     DEBUG = True
     ALLOWED_HOSTS = ['*']
     # SECURITY WARNING: keep the secret key used in production secret!
     #SECRET_KEY = 'django-insecure-&-eeyt!u!bqr4d7zy(bf7kwm33rumqrvtk3n6bkua#(^3$sse@'
     log_file = 'log/logfile.log'
+    
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Application definition
 
@@ -90,30 +113,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'peer_sure_app.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-'''
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "db-peer-sure",
-        "USER": "mudatalab",
-        "PASSWORD": os.getenv("DB_PASS_PEER_SURE_DEPLOY_TEST"),
-        "HOST": "db-peer-sure-deploy-test.postgres.database.azure.com",
-        "PORT": "5432",
-        "OPTIONS": {"sslmode": "require"},
-    }
-}
-'''
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
