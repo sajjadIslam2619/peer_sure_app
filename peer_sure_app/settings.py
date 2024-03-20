@@ -29,7 +29,7 @@ if DJANGO_ENV == 'prod':
     DEBUG = False
     ALLOWED_HOSTS = ['*','peer-sure-app.azurewebsites.net']
 
-    log_file = BASE_DIR / 'log/dev.log'
+    log_file = BASE_DIR / 'log/prod.log'
     log_file.parent.mkdir(parents=True, exist_ok=True)
 
     if not log_file.exists():
