@@ -24,12 +24,21 @@ with open(os.path.join(BASE_DIR, 'secret_key.txt')) as f:
     SECRET_KEY = f.read().strip()
 
 DJANGO_ENV = os.getenv('DJANGO_ENV_PEER_SURE', 'dev') # default dev
-print('DJANGO_ENV :: ', DJANGO_ENV)
+
 if DJANGO_ENV == 'prod':
     DEBUG = False
     ALLOWED_HOSTS = ['*','peer-sure-app.azurewebsites.net']
-    #SECRET_KEY = 'django-insecure-&-eeyt!u!bqr4d7zy(bf7kwm33rumqrvtk3n6bkua#(^3$sse@'
-    #log_file = 'app_log.log'
+
+    log_file = BASE_DIR / 'log/dev.log'
+    log_file.parent.mkdir(parents=True, exist_ok=True)
+
+    if not log_file.exists():
+        with open(log_file, 'w') as file:
+            file.write('')  # Creates an empty log file
+    
+    # Follow these link: Azure + Django + Postgre
+    # https://www.youtube.com/watch?v=h_XJ7axGQpo
+    # https://dev.to/lestersimjj/deploy-a-django-web-app-to-azure-with-connection-to-azure-postgresql-hl3 
 
     # Database
     # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -51,8 +60,13 @@ else:
     ALLOWED_HOSTS = ['*']
     # SECURITY WARNING: keep the secret key used in production secret!
     #SECRET_KEY = 'django-insecure-&-eeyt!u!bqr4d7zy(bf7kwm33rumqrvtk3n6bkua#(^3$sse@'
-    log_file = 'log/logfile.log'
-    
+    log_file = BASE_DIR / 'log/dev.log'
+    log_file.parent.mkdir(parents=True, exist_ok=True)
+
+    if not log_file.exists():
+        with open(log_file, 'w') as file:
+            file.write('')  # Creates an empty log file
+
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -177,7 +191,7 @@ CHECK_IN_SURVEY = 'Weekly Check In Survey'
 PAST_HISTORY_SURVEY = 'Past Medical and Family History Survey'
 DEMOGRAPHIC_SURVEY = 'Demographic Survey'
 
-'''
+
 LOG_LEVEL = 'DEBUG' if DEBUG else 'INFO'
 LOGGING = {
     'version': 1,
@@ -217,4 +231,3 @@ LOGGING = {
         },
     },
 }
-'''
