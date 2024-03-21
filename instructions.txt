@@ -88,3 +88,10 @@ python manage.py startapp APP_NAME
 
 # Create db in Azure cloud-shell
 # az postgres db create -g rg-peer-sure-app-deploy-test-1 -s db-peer-sure-deploy-test.postgres -n db-peer-sure
+
+# static fields
+#https://docs.djangoproject.com/en/5.0/howto/static-files/
+
+# Follow these link: Azure + Django + Postgre
+# https://www.youtube.com/watch?v=h_XJ7axGQpo
+# https://dev.to/lestersimjj/deploy-a-django-web-app-to-azure-with-connection-to-azure-postgresql-hl3 

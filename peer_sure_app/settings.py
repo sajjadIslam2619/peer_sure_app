@@ -36,10 +36,6 @@ if DJANGO_ENV == 'prod':
         with open(log_file, 'w') as file:
             file.write('')  # Creates an empty log file
     
-    # Follow these link: Azure + Django + Postgre
-    # https://www.youtube.com/watch?v=h_XJ7axGQpo
-    # https://dev.to/lestersimjj/deploy-a-django-web-app-to-azure-with-connection-to-azure-postgresql-hl3 
-
     # Database
     # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
@@ -47,7 +43,7 @@ if DJANGO_ENV == 'prod':
         "default": {
             "ENGINE": "django.db.backends.postgresql",
             "NAME": "postgres",
-            "USER": "mudatalab",
+            "USER": "datalabmu",
             "PASSWORD": os.getenv("DB_PASS_PEER_SURE_APP"),
             "HOST": "db-peer-sure-app.postgres.database.azure.com",
             "PORT": "5432",
