@@ -7,6 +7,7 @@
             <div class="media-body">
                 <h4 class="account-heading">{{ user.username }}</h4>
                 <p class="text-secondary">{{ user.email }}</p>
+                <p><a href="{% url 'change_password' %}">Update Password</a></p>
             </div>
         </div>
 

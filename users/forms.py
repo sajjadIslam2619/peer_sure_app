@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .models import UserProfile
+from django.contrib.auth.forms import PasswordChangeForm
 
 
 class UserRegisterForm(UserCreationForm):
@@ -64,4 +65,7 @@ class DemographicSurveyForm(forms.ModelForm):
             if field_name in initial:
                 # Assuming initial[field_name] is the ID of the selected Option
                 self.fields[field_name].initial = initial[field_name]
-        
+
+class UserPasswordChangeForm(PasswordChangeForm):
+    def __init__(self, *args, **kwargs):
+        super(UserPasswordChangeForm, self).__init__(*args, **kwargs)

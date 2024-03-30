@@ -2,22 +2,27 @@
 {% block content %}
   <div class="user-posts-header">
     <h3 class="user-posts-title">Posts by {{ view.kwargs.username }}</h3>
-    <span class="post-count-badge">{{ page_obj.paginator.count }} Posts</span>
+    <!-- <span class="post-count-badge">{{ page_obj.paginator.count }} Posts</span> -->
+    <span class="post-count-badge">{{ total_post_count }} Posts</span>
   </div>
     {% if posts %}
-        {% for post in posts %}
-            <article class="media content-section">
-              <!--<img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}">-->
-              <div class="media-body">
-                <div class="article-metadata">
-                  <a class="mr-2" href="{% url 'user-posts' post.author.username %}">{{ post.author }}</a>
-                  <small class="text-muted">{{ post.date_posted|date:"F d, Y" }}</small>
-                </div>
-                <h2><a class="article-title" href="{% url 'post-detail' post.id %}">{{ post.title }}</a></h2>
-                <p class="article-content">{{ post.content }}</p>
-              </div>
-            </article>
-        {% endfor %}
+      {% for post in posts %}
+        <article class="media content-section">
+          <div class="media-body">
+            <div class="article-metadata">
+              {% if not post.anonymous %}
+                <a class="mr-2" href="{% url 'user-posts' post.author.username %}">{{ post.author }}</a>
+              {% elif post.anonymous and user == profile_user %}
+                <!-- Anonymous post, but the current user is the author -->
+                <a class="mr-2">Posted as anonymous</a>
+              {% endif %}
+              <small class="text-muted">{{ post.date_posted|date:"F d, Y" }}</small>
+            </div>
+            <h2><a class="article-title" href="{% url 'post-detail' post.id %}">{{ post.title }}</a></h2>
+            <p class="article-content">{{ post.content }}</p>
+          </div>
+        </article>
+      {% endfor %}
         {% if is_paginated %}
 
           {% if page_obj.has_previous %}
