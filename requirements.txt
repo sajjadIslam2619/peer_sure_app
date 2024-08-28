@@ -6,3 +6,6 @@ django-cors-headers==4.3.1
 plotly==5.20.0
 pandas==2.2.1
 psycopg2-binary==2.9.9
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib

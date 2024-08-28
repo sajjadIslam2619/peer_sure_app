@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .forms import UserRegisterForm, UserProfileForm, HistorySurveyForm, DemographicSurveyForm
+from .forms import UserRegisterForm, UserProfileForm, HistorySurveyForm, DemographicSurveyForm, PasswordResetRequestForm
 from django.views.decorators.csrf import csrf_exempt
 from survey.models import Survey, Question, Option, Response
 from peer_sure_app.settings import CHECK_IN_SURVEY, PAST_HISTORY_SURVEY, DEMOGRAPHIC_SURVEY
@@ -11,7 +11,17 @@ from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.contrib.auth import update_session_auth_hash
-from .forms import UserPasswordChangeForm
+from .forms import UserPasswordChangeForm, UpdatePasswordForm
+from django.contrib.auth.models import User
+from django.utils.crypto import get_random_string
+from .gmail_backend import GmailBackend
+from django.contrib.auth import login
+from django.urls import reverse_lazy
+from django.core.mail import EmailMessage
+from django.utils.http import urlsafe_base64_decode
+from django.utils.encoding import force_str
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth import update_session_auth_hash
 import logging
 logger = logging.getLogger(__name__)
 
@@ -167,3 +177,58 @@ def custom_logout(request):
     logout(request)
     #messages.info(request, "You have successfully logged out.")
     return render(request, 'users/logout.html')
+
+def custom_password_reset_view(request):
+    if request.method == 'POST':
+        form = PasswordResetRequestForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            logger.info(f"Email requested for password reset: {email}")
+            # Sending the password reset email using GmailBackend
+            email_backend = GmailBackend()
+            email_sent = email_backend.send_password_reset(request, email)
+
+            if email_sent:
+                return render(request, 'users/password_reset_done.html')
+            else:
+                return render(request, 'users/password_reset.html', {'form': form, 'error': 'Failed to send email. Please try again later or contact mudatalag@gmail.com.'})
+
+        else:
+            return render(request, 'users/password_reset.html', {'form': form})
+    else:
+        form = PasswordResetRequestForm()
+    return render(request, 'users/password_reset.html', {'form': form})
+
+def update_password(request, uidb64=None, token=None):
+    if uidb64 and token:
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+            logger.error("User not found or invalid user ID.")
+        
+        if user is not None and default_token_generator.check_token(user, token):
+            if request.method == 'POST':
+                form = UpdatePasswordForm(user=user, data=request.POST)
+                if form.is_valid():
+                    logger.info("Form is valid, attempting to save new password.")
+                    user = form.save()
+                    update_session_auth_hash(request, user)  # Important to keep the user logged in
+                    messages.success(request, 'Your password has been successfully updated!')
+                    logger.info("Password updated successfully for user.")
+                    return redirect('login')  # Redirect to login after successful reset
+                else:
+                    logger.error("Form is invalid. Errors: %s", form.errors)
+                    messages.error(request, 'Please correct the error below.')
+            else:
+                form = UpdatePasswordForm(user=user)
+            return render(request, 'users/update_password.html', {'form': form})
+        else:
+            logger.error("The password reset link was invalid or the token has expired.")
+            messages.error(request, 'The password reset link was invalid.')
+            return redirect('login')
+    else:
+        logger.error("The password reset link is missing.")
+        messages.error(request, 'The password reset link is missing.')
+        return redirect('login')

@@ -14,7 +14,7 @@
         </form>
         <div class="border-top pt-3">
             <small class="text-muted">
-                Forgot Password? Please e-mail to <a href="mailto:mudatalab@gmail.com" class="ml-2">mudatalab@gmail.com</a>
+                Forgot Password? <a class="ml-2" href="{% url 'password_reset' %}">Reset Password</a>
             </small>
             <hr>
             <small class="text-muted">
@@ -22,4 +22,9 @@
             </small>
         </div>
     </div>
+    <!-- Footer Section -->
+    <footer style="background-color: #5f788a; color: white; margin-top: 1rem; padding: 0.5rem; text-align: center;">
+        <p>Support Email: <a href="mailto:mudatalab@gmail.com" class="text-white">mudatalab@gmail.com</a></p>
+        <p>&copy; Data Lab, Marquette University.</p>
+    </footer>
 {% endblock content %}
