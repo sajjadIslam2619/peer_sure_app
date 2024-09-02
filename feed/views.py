@@ -2,12 +2,15 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from .models import Post, Comment
 from .forms import CommentForm, PostForm
-from users.models import UserProfile
+from users.models import UserProfile, Organization
+from peer_sure_app.settings import MESSAGE_FORUM_ACCESS_DENIED
 import time
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.http import HttpResponseRedirect
 from django.http import JsonResponse
 from APIs.generative_AI_api import chatGPT_api
 from django.views.generic import (
@@ -18,6 +21,7 @@ from django.views.generic import (
     DeleteView
 )
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
 import logging
 logger = logging.getLogger(__name__)
 
@@ -38,25 +42,93 @@ class PostListView(ListView):
     ordering = ['-date_posted']
     paginate_by = 2
 
+    def dispatch(self, request, *args, **kwargs):
+        """
+        Handle redirections before get_queryset is called.
+        """
+        selected_organization = self.get_selected_organization()
+
+        # Check if selected_organization is None to handle redirections
+        if selected_organization is None:
+            # Perform the actual redirection in dispatch instead of get_selected_organization
+            if self.redirect_url:
+                return redirect(self.redirect_url)
+        
+        # Set the selected organization for further use
+        self.selected_organization = selected_organization  
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_selected_organization(self):
+        """
+        Retrieve or select the organization based on session data or user profile.
+        """
+        selected_organization = None
+        self.redirect_url = None
+        if not self.request.user.is_superuser:
+            selected_org_id = self.request.session.get('selected_organization_id')
+            
+            if selected_org_id:
+                try:
+                    selected_organization = Organization.objects.get(id=selected_org_id)
+                    logger.info(f'Selected Organization :: {selected_organization}')
+                except Organization.DoesNotExist:
+                    # Redirect if the selected organization is not found
+                    return redirect('organization_selection')
+            else:
+                user_profile = self.request.user.user_profile
+                organizations = user_profile.organizations.all()
+
+                if organizations.exists():
+                    # User should have only one organization in this case. 
+                    # Otherwise app will redirect to organization selection view in the previous view.
+                    selected_organization = organizations.first()
+                    logger.info(f'Selected first organization: {selected_organization}')
+
+                    if selected_organization.name == 'No Organization':
+                        logger.info('User has no valid organizations.')
+                        messages.info(self.request, MESSAGE_FORUM_ACCESS_DENIED)
+                        self.redirect_url = 'profile'  # Redirect to profile section if 'No Organization' is selected
+
+                    # Optionally store the selected organization in the session
+                    # self.request.session['selected_organization_id'] = selected_organization.id
+                else:
+                    logger.info('User has no organizations.')
+                    messages.info(self.request, MESSAGE_FORUM_ACCESS_DENIED)
+                    self.redirect_url = 'profile'   # Redirect to profile section if 'No Organization' is selected
+
+        return selected_organization
+
     def get_queryset(self):
         user = User.objects.filter(username=self.request.user).first()
 
         if user.is_superuser:
             return Post.objects.all().order_by('-date_posted')
+        
+        selected_organization = self.selected_organization
 
         if user.user_profile.role=='mentee':
             mentor_email = user.user_profile.mentor_email
-            userProfiles= UserProfile.objects.filter(mentor_email=mentor_email)
+            #userProfiles= UserProfile.objects.filter(mentor_email=mentor_email)
+            userProfiles = UserProfile.objects.filter(
+                mentor_email=mentor_email,
+                organizations=selected_organization
+            )
             mentee_users = User.objects.filter(id__in=userProfiles.values('user_id'))
             
-            return Post.objects.filter(author__in=mentee_users.values('id')).order_by('-date_posted')
+            return Post.objects.filter(Q(author__in=mentee_users.values('id')) | Q(author__email=mentor_email), 
+                                       organization=selected_organization).order_by('-date_posted')
         
         elif user.user_profile.role=='mentor':
             mentor_email = user.email
-            userProfiles= UserProfile.objects.filter(mentor_email=mentor_email)
+            #userProfiles= UserProfile.objects.filter(mentor_email=mentor_email)
+            userProfiles = UserProfile.objects.filter(
+                mentor_email=mentor_email,
+                organizations=selected_organization
+            )
             mentee_users = User.objects.filter(id__in=userProfiles.values('user_id'))
             
-            return Post.objects.filter(author__in=mentee_users.values('id')).order_by('-date_posted')
+            return Post.objects.filter(Q(author__in=mentee_users.values('id')) | Q(author=user), 
+                                       organization=selected_organization).order_by('-date_posted')
             
         return user.post_set.all().order_by('-date_posted')
 
@@ -157,6 +229,12 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.author = self.request.user
+        selected_org_id = self.request.session.get('selected_organization_id')
+        if selected_org_id:
+            form.instance.organization = Organization.objects.get(id=selected_org_id)
+        else:
+            form.instance.organization = self.request.user.user_profile.organizations.first()
+
         return super().form_valid(form)
     
 #@csrf_exempt

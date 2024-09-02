@@ -5,26 +5,45 @@
         <div class="media">
             <!--<img class="rounded-circle account-img" src="{{ user.profile.image.url }}">-->
             <div class="media-body">
-                <h4 class="account-heading">{{ user.username }}</h4>
-                <p class="text-secondary">{{ user.email }}</p>
-                <p><a href="{% url 'change_password' %}">Update Password</a></p>
+                <h5 class="account-heading">{{ user.username }}</h5>
+                <h6 class="text-secondary"><strong>Email</strong> {{ user.email }}</h6>
+                <h6 class="text-secondary">
+                    <strong>Organizations</strong>
+                    {% if user.user_profile.organizations.exists %}
+                        {{ user.user_profile.organizations.all|join:", " }}
+                    {% else %}
+                        No organizations associated.
+                    {% endif %}
+                </h6>
+                <h6 class="text-secondary"> <strong>Update Password </strong> <a href="{% url 'change_password' %}">Click Here</a></h6>
             </div>
         </div>
-
+        <hr>
+        <div>
         <!-- Tab buttons -->
         <ul class="nav nav-tabs" id="surveyTab" role="tablist">
             <li class="nav-item">
-                <a class="nav-link active" id="pmh-tab" data-toggle="tab" href="#pmh" role="tab" aria-controls="pmh" aria-selected="true">{{ PMH_survey.title }}</a>
+                <a class="nav-link active" id="pmh-tab" data-toggle="tab" href="#pmh" role="tab" aria-controls="pmh" aria-selected="true">
+                    {% if PMH_survey %}
+                    {{ PMH_survey.title }} ({{ PMH_survey.category }})
+                {% else %}
+                    Past Medical History Survey
+                {% endif %}
+                </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" id="demographic-tab" data-toggle="tab" href="#demographic" role="tab" aria-controls="demographic" aria-selected="false">{{ demographic_survey.title }}</a>
             </li>
         </ul>
-
+        </div>
         <!-- Tab content -->
         <div class="tab-content" id="surveyTabContent">
             <div class="tab-pane fade show active" id="pmh" role="tabpanel" aria-labelledby="pmh-tab">
                 <br>
+                {% if survey_error_message %}
+                    <!-- Display the error message when the survey is not available -->
+                    <p class="text-danger">{{ survey_error_message }}</p>
+                {% elif form %}
                 <!-- PMH Survey Form -->
                 <form method="post">
                     {% csrf_token %}
@@ -45,6 +64,9 @@
                     <button type="submit" class="btn btn-primary">{% if form.initial %}Update{% else %}Submit{% endif %}</button>
                     <br>
                 </form>
+                {% else %}
+                    <p>No form available.</p>
+                {% endif %}
             </div>
             <div class="tab-pane fade" id="demographic" role="tabpanel" aria-labelledby="demographic-tab">
                 <br>

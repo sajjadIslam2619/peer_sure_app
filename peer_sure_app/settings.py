@@ -192,8 +192,23 @@ CORS_ORIGIN_ALLOW_ALL = True
 #]
 
 CHECK_IN_SURVEY = 'Weekly Check In Survey'
+SURVEY_CATEGORY_CHECK_IN = 'Check-In'
 PAST_HISTORY_SURVEY = 'Past Medical and Family History Survey'
+SURVEY_CATEGORY_PMHx = 'PMHx'
 DEMOGRAPHIC_SURVEY = 'Demographic Survey'
+SURVEY_CATEGORY_DEMOGRAPHY='Demography'
+MESSAGE_SURVEY_CHECK_IN="You've 'No Organization'. Please update your organization to access 'Check-In' survey."
+MESSAGE_SURVEY_REQUIRED_SURVEY="Survey not available, required survey category:"
+MESSAGE_SURVEY_PENDING_SURVEY="Please visit your profile to complete the pending surveys:"
+MESSAGE_ORGANIZATION_MISSING="You've 'No Organization'. Please update your organization."
+MESSAGE_SURVEY_UNAVAIABLE="No survey available."
+MESSAGE_SURVEY_PMHx_UNACCESSIBLE="You've 'No Organization'. To access 'Past Medical History Survey' please update your organization."
+MESSAGE_EMAIL_SEND_FAILED="Failed to send email. Please try again later or contact mudatalag@gmail.com."
+MESSAGE_PASSWORD_RESET_INVALID_LINK="The password reset link was invalid."
+MESSAGE_PASSWORD_RESET_MISSING_LINK="The password reset link is missing."
+MESSAGE_PASSWORD_UPDATED="Your password has been successfully updated!"
+MESSAGE_VISUAL_ACCESS_DENIED="You've 'No Organization'. To access Progress-Tracker please update your organization."
+MESSAGE_FORUM_ACCESS_DENIED="You've 'No Organization'. Please update your organization to access 'Forum'."
 
 
 LOG_LEVEL = 'DEBUG' if DEBUG else 'INFO'

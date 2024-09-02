@@ -13,13 +13,15 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models.functions import ExtractWeek, ExtractYear
 import numpy as np
-from peer_sure_app.settings import CHECK_IN_SURVEY, PAST_HISTORY_SURVEY
+from peer_sure_app.settings import CHECK_IN_SURVEY, PAST_HISTORY_SURVEY, MESSAGE_VISUAL_ACCESS_DENIED, MESSAGE_SURVEY_REQUIRED_SURVEY
+from peer_sure_app.settings import SURVEY_CATEGORY_CHECK_IN, SURVEY_CATEGORY_PMHx
 from datetime import datetime, timedelta
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.http import Http404
 import plotly.graph_objects as go
 from statistics import median
 from django.contrib import messages
+from users.models import Organization
 import logging
 import os
 logger = logging.getLogger(__name__)
@@ -28,6 +30,63 @@ logger = logging.getLogger(__name__)
 @csrf_exempt
 @login_required
 def vizual_home(request):
+    selected_organization = None
+    if not request.user.is_superuser:
+        selected_org_id = request.session.get('selected_organization_id')
+        if selected_org_id:
+            try:
+                selected_organization = Organization.objects.get(id=selected_org_id)
+                logger.info(f'Selected Organization :: {selected_organization}')
+            except Organization.DoesNotExist:
+                # Handle the case where the selected organization is not found
+                return redirect('organization_selection')
+        else:
+            user_profile = request.user.user_profile
+            organizations = user_profile.organizations.all()
+
+            if organizations.exists():
+                # User should have only one organization in this case. 
+                # Otherwise app will redirect to organization selection view in the previous view.
+                selected_organization = organizations.first()
+                logger.info(f'Selected first organization: {selected_organization}')
+
+                if selected_organization == 'No Organization':
+                    logger.info('User has no organizations.')
+                    messages.info(request, MESSAGE_VISUAL_ACCESS_DENIED)
+                    return redirect('profile')  # Redirect to profile section if 'No Organization' is selected
+
+                # Store the selected organization in the session
+                #request.session['selected_organization_id'] = selected_organization.id
+            else:
+                # Handle the case where the user has no organizations
+                logger.info('User has no organizations.')
+                messages.info(request, MESSAGE_VISUAL_ACCESS_DENIED)
+                return redirect('profile')  # Redirect to profile section if 'No Organization' is selected
+    
+        #surveys = Survey.objects.filter(organization=selected_organization)
+        try:
+            # There should have only one Check-In survey for each Organization
+            check_in_survey = Survey.objects.filter(organization=selected_organization, category__category=SURVEY_CATEGORY_CHECK_IN).first()
+            if not check_in_survey:
+                raise Survey.DoesNotExist
+            logger.debug(f'Survey found: {check_in_survey.title} for organization {check_in_survey.organization}')
+        except Survey.DoesNotExist:
+            logger.error(f"Survey not available, required survey category: {SURVEY_CATEGORY_CHECK_IN}")
+            return render(request, 'vizual/error.html', {'message': f'{MESSAGE_SURVEY_REQUIRED_SURVEY} {SURVEY_CATEGORY_CHECK_IN}'})
+        
+    else:
+        try:
+            check_in_survey = Survey.objects.filter(category__category=SURVEY_CATEGORY_CHECK_IN).first()
+            if not check_in_survey:
+                raise Survey.DoesNotExist
+            logger.debug(f'Survey found: {check_in_survey.title} for organization {check_in_survey.organization}')
+        except Survey.DoesNotExist:
+            logger.error(f"Survey not available, required survey category: {SURVEY_CATEGORY_CHECK_IN}")
+            return render(request, 'vizual/error.html', {'message': f'{MESSAGE_SURVEY_REQUIRED_SURVEY} {SURVEY_CATEGORY_CHECK_IN}'})
+
+    
+    #survey = None
+    
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
     selected_mentee_username = request.GET.get('mentee')
@@ -38,10 +97,15 @@ def vizual_home(request):
     else:
         question_filter = True
 
+    '''
     try:
-        check_in_survey = get_object_or_404(Survey, title=CHECK_IN_SURVEY)
-    except Http404:
+        #check_in_survey = get_object_or_404(Survey, title=CHECK_IN_SURVEY)
+        check_in_survey = surveys.get(title=CHECK_IN_SURVEY)
+        logger.debug(f'Survey found: {check_in_survey.title} for organization {check_in_survey.organization}')
+    except Survey.DoesNotExist:
+        logger.error(f"Survey not available, required survey: {CHECK_IN_SURVEY}")
         return render(request, 'vizual/error.html', {'message': f'Survey not available, required survey: {CHECK_IN_SURVEY}'})
+    '''
     
     all_questions = Question.objects.filter(survey=check_in_survey)
     question_map = {question.id: question.question for question in all_questions}
@@ -61,7 +125,7 @@ def vizual_home(request):
     user = request.user
     mentor_email  = user.email
 
-    mentee_list = UserProfile.objects.filter(mentor_email=mentor_email)
+    mentee_list = UserProfile.objects.filter(mentor_email=mentor_email, organizations=selected_organization)
 
     all_mentees = []
 
@@ -79,7 +143,7 @@ def vizual_home(request):
         year_end, week_number_end, weekday_end = end_date_obj.isocalendar()
 
     else:
-        mentee_users = UserProfile.objects.filter(mentor_email=mentor_email).values_list('user', flat=True)
+        mentee_users = UserProfile.objects.filter(mentor_email=mentor_email, organizations=selected_organization).values_list('user', flat=True)
         mentee_responses = Response.objects.filter(user__in=mentee_users, survey = check_in_survey)
         sorted_responses = mentee_responses.order_by('date_responsed')
         earliest_response = sorted_responses.first()

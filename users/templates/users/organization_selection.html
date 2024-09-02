@@ -1,0 +1,32 @@
+{% extends "feed/base.html" %}
+
+{% block content %}
+  <!-- Display Messages -->
+  {% if messages %}
+      <div class="messages">
+          {% for message in messages %}
+              <div{% if message.tags %} class="{{ message.tags }}"{% endif %}></div>
+          {% endfor %}
+      </div>
+  {% endif %}
+  
+  <h2 class="custom-title">Select Your Organization</h2>
+  <form method="POST">
+    {% csrf_token %}
+    <div class="choices-container">
+      <ul>
+        {% for organization in organizations %}
+          <label class="choice-button choice-option">
+            <input type="radio" name="organization" value="{{ organization.id }}" id="org_{{ organization.id }}">
+            {{ organization.name }}
+          </label>
+        {% endfor %}
+      </ul>
+    </div>
+    <div>
+      <br>
+      <button type="submit" class="btn btn-primary">Continue</button>
+      <br><br>
+    </div>
+  </form>
+{% endblock %}

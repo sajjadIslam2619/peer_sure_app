@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import UserProfile
+from .models import UserProfile, Organization
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.forms import SetPasswordForm
 
@@ -16,9 +16,15 @@ class UserRegisterForm(UserCreationForm):
 
 class UserProfileForm(forms.ModelForm):
     #mentor_email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Please enter your mentor\'s email here, if you have a mentor. Otherwise you will be assigned a mentor later.'}))
+    organizations = forms.ModelMultipleChoiceField(
+        queryset=Organization.objects.all(),
+        widget=forms.CheckboxSelectMultiple,  # You can use SelectMultiple or CheckboxSelectMultiple
+        required=True
+    )
+    
     class Meta:
         model = UserProfile
-        fields = ['role', 'mentor_email']
+        fields = ['role', 'organizations', 'mentor_email']
 
 
 from survey.models import Question, Survey, Option, Response

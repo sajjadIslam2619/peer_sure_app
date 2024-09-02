@@ -59,6 +59,8 @@ urlpatterns = [
     #path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
     #path('survey/', include('survey.urls')),
     path('user-redirect/', user_views.user_redirect, name='user_redirect'),
+    path('organization-selection/', user_views.organization_selection, name='organization_selection'),
+    path('user-redirect-after-selection/', user_views.user_redirect_after_selection, name='user_redirect_after_selection'),
     path('', include('survey.urls')),
     path('vizual/', include('vizual.urls')),
     path('feed/', include('feed.urls')),

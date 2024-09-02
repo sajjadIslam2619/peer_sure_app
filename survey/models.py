@@ -2,12 +2,38 @@ from django.db import models
 from django.utils import timezone
 from django.urls import reverse
 from django.contrib.auth.models import User
+from users.models import Organization
+
+def get_default_organization_id():
+    return Organization.objects.get_or_create(name='No Organization')[0].id
+
+def get_default_survey_category_id():
+    # Fetch or create the default 'No Category'
+    return SurveyCategory.objects.get_or_create(category='No Category')[0].id
+
+class SurveyCategory(models.Model):
+    category = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.category
 
 class Survey(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    organization = models.ForeignKey(
+        Organization, 
+        on_delete=models.SET_DEFAULT, 
+        default=get_default_organization_id
+    )
+    category = models.ForeignKey(
+        SurveyCategory, 
+        on_delete=models.SET_DEFAULT, 
+        default=get_default_survey_category_id  # Creates one-to-many relationship
+    )
 
     def __str__(self):
         return self.title
