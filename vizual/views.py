@@ -328,8 +328,9 @@ def vizual_home(request):
                 'zero_count': missing_week_list
             }
     
+    logger.info(f"Mentor : {user}")
     for mentee, scores in mentee_scores.items():
-        logger.debug(f"{mentee}: {scores}")
+        logger.info(f"{mentee}: {scores}")
 
     df = pd.DataFrame()
     if not mentee_scores:

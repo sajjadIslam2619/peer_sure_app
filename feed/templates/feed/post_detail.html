@@ -16,12 +16,31 @@
         var generated_response = response.generated_response;
         document.getElementById("id_content").value = generated_response;
         var labelElement = document.getElementById('wait_message');
-        labelElement.textContent = '';
+        labelElement.textContent = 'Sample message';
       }
     };
     var url = "/get_generated_response/?post_value=" + encodeURIComponent(textValue);
     xhttp.open("GET", url, true);
     xhttp.send();
+  }
+
+  function generateDemoResponse() {
+    document.getElementById('wait_message').innerText= 'Please wait, AI is generating response...';
+
+    // Set a timeout to wait for 3 seconds before generating the sample response
+    setTimeout(function() {
+      var sampleResponse = "Congrats on making it to day 4 – that's a big accomplishment! I know it's tough balancing your detox with running your businesses, and it's great you're so determined. \n\nTaking Kratom for just today might not set you back to day one, but be cautious. It can come with its own risks if used for too long. You've already shown so much strength, and your health is what matters most in the long run. \n\nWishing you the best as you push through this – you’ve got this! Stay strong! ";
+
+      // Find the textarea element inside the form (assuming it's the first textarea in the form)
+      var textareaElement = document.getElementsByTagName('textarea')[0];
+      if (textareaElement) {
+        textareaElement.value = sampleResponse;
+      }
+
+      // Update the label to indicate that the sample message is ready
+      var labelElement = document.getElementById('wait_message');
+      labelElement.textContent = 'AI generated response';
+    }, 3000); // 3000 milliseconds = 3 seconds
   }
 </script>
 
@@ -60,14 +79,14 @@
             {{ comment_form|crispy }}
             {% if user.user_profile.role == 'mentor' %}
               <div class="form-group">
-                <!-- <button type="button" name="generate_response" onclick="generateResponse()">Generate Response with AI</button> -->
-                <button type="submit" value="Post">Post</button>
+                <!-- <button class="btn btn-primary" type="submit" name="generate_response" onclick="generateDemoResponse()">Generate Response with AI</button> --> 
+                <button class="btn btn-primary" type="submit" value="Post">Post</button>
                 <br>
                 <label id="wait_message" style="color:rgb(32, 56, 210);"></label>
               </div>
             {% else %}
               <div class="form-group">
-                <button type="submit" value="Post">Post</button>
+                <button class="btn btn-primary" type="submit" value="Post">Post</button>
               </div>
             {% endif %}
 
